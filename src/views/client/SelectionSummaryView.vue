@@ -1,29 +1,36 @@
 <template>
   <div class="summary-page">
     <!-- Header -->
-    <header class="summary-header">
+    <header class="summary-header ps-glass">
       <div class="header-content">
-        <v-btn icon="mdi-arrow-left" variant="text" size="small" :to="`/gallery/${shareId}`" />
-        <span class="text-body-1 font-weight-bold">Review Selection</span>
-        <div style="width: 40px" />
+        <button class="back-btn" @click="$router.push(`/gallery/${shareId}`)">
+          <v-icon size="18">mdi-arrow-left</v-icon>
+        </button>
+        <span class="header-title">Review Selection</span>
+        <div style="width: 36px" />
       </div>
     </header>
 
-    <div class="summary-content ps-page" v-if="project">
-      <!-- Project Info -->
-      <div class="summary-intro text-center">
-        <h1 class="text-h5 font-weight-bold">{{ project.name }}</h1>
-        <p class="text-body-2 text-medium-emphasis">
-          You've selected <strong>{{ selectedImages.length }}</strong> out of {{ project?.images?.length ?? 0 }} photos
+    <div class="summary-content" v-if="project">
+      <!-- Intro -->
+      <div class="summary-intro ps-animate-in">
+        <div class="intro-badge">
+          <v-icon size="14" color="pink">mdi-heart</v-icon>
+          Review & Confirm
+        </div>
+        <h1 class="intro-title">{{ project.name }}</h1>
+        <p class="intro-subtitle">
+          You've selected <strong class="ps-text-gradient">{{ selectedImages.length }}</strong>
+          out of {{ project?.images?.length ?? 0 }} photos
         </p>
       </div>
 
       <!-- Selected Photos Grid -->
-      <div class="selected-grid mx-auto" v-if="selectedImages.length > 0">
+      <div class="selected-grid ps-stagger" v-if="selectedImages.length > 0">
         <div v-for="(image, idx) in selectedImages" :key="image.id" class="selected-item">
-          <v-img :src="image.thumbUrl" cover aspect-ratio="1" class="rounded-lg">
+          <v-img :src="image.thumbUrl" cover aspect-ratio="1" class="selected-img">
             <template #placeholder>
-              <v-sheet color="grey-lighten-3" class="fill-height shimmer rounded-lg" />
+              <div class="shimmer-placeholder" />
             </template>
           </v-img>
           <!-- Remove button -->
@@ -39,31 +46,39 @@
       </div>
 
       <!-- Empty state -->
-      <div v-else class="ps-empty-card text-center">
-        <v-icon size="56" color="grey-lighten-2" class="mb-4">mdi-heart-off-outline</v-icon>
-        <h3 class="text-h6 mb-2">No photos selected</h3>
-        <p class="text-body-2 text-medium-emphasis mb-4">Go back and select your favorite photos first.</p>
-        <v-btn variant="outlined" :to="`/gallery/${shareId}`" class="text-none">
+      <div v-else class="empty-selection ps-animate-in">
+        <div class="empty-icon">
+          <v-icon size="40" color="white">mdi-heart-off-outline</v-icon>
+        </div>
+        <h3 class="empty-title">No photos selected</h3>
+        <p class="empty-desc">Go back and select your favorite photos first.</p>
+        <v-btn variant="outlined" color="primary" :to="`/gallery/${shareId}`" class="text-none" rounded="lg">
+          <v-icon start size="18">mdi-arrow-left</v-icon>
           Back to Gallery
         </v-btn>
       </div>
 
       <!-- Confirm Section -->
-      <div v-if="selectedImages.length > 0" class="confirm-section">
-        <v-card class="pa-6 confirm-card mx-auto">
-          <h3 class="text-body-1 font-weight-bold mb-2">Ready to submit?</h3>
-          <p class="text-body-2 text-medium-emphasis mb-5">
-            Once submitted, your photographer will receive your selection of {{ selectedImages.length }} photos.
+      <div v-if="selectedImages.length > 0" class="confirm-section ps-animate-in ps-animate-in-delay-3">
+        <div class="confirm-card">
+          <div class="confirm-card__icon">
+            <v-icon size="28" color="white">mdi-check-circle-outline</v-icon>
+          </div>
+          <h3 class="confirm-title">Ready to submit?</h3>
+          <p class="confirm-desc">
+            Once submitted, your photographer will receive your selection of
+            <strong>{{ selectedImages.length }} photos</strong>.
             You won't be able to make changes after submission.
           </p>
           <v-btn
             block
             color="primary"
             size="x-large"
-            class="text-none mb-3"
+            class="text-none ps-btn-glow confirm-btn"
             :loading="projectStore.loading"
             @click="handleSubmit"
             elevation="0"
+            rounded="lg"
           >
             <v-icon start>mdi-check-circle-outline</v-icon>
             Confirm & Submit Selection
@@ -73,11 +88,13 @@
             variant="text"
             :to="`/gallery/${shareId}`"
             class="text-none"
-            color="on-surface"
+            color="grey-darken-1"
+            size="large"
           >
+            <v-icon start size="18">mdi-arrow-left</v-icon>
             Go back and edit
           </v-btn>
-        </v-card>
+        </div>
       </div>
     </div>
   </div>
@@ -97,16 +114,13 @@ const shareId = computed(() => props.shareId || route.params.shareId)
 const project = computed(() => projectStore.getProjectByShareId(shareId.value))
 
 onMounted(() => {
-  if (!project.value) {
-    projectStore.fetchProjectByShareId(shareId.value).catch(() => {})
-  }
+  if (!project.value) projectStore.fetchProjectByShareId(shareId.value).catch(() => {})
 })
+
 const selectedImages = computed(() => project.value?.images?.filter(i => i.selected) ?? [])
 
 function toggleSelect(imageId) {
-  if (project.value) {
-    projectStore.toggleImageSelection(project.value.shareId, imageId)
-  }
+  if (project.value) projectStore.toggleImageSelection(project.value.shareId, imageId)
 }
 
 async function handleSubmit() {
@@ -118,56 +132,120 @@ async function handleSubmit() {
 <style scoped>
 .summary-page {
   min-height: 100vh;
-  background: #F9FAFB;
+  background: var(--ps-surface-dim);
 }
+
+/* ─── Header ──────────────────────────────────────────────────────────── */
 
 .summary-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid #E5E7EB;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
+
 .header-content {
   max-width: 800px;
   margin: 0 auto;
-  padding: 8px var(--ps-gutter);
+  padding: 10px var(--ps-gutter);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+.back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ps-radius-md);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  transition: all var(--ps-duration-fast);
+}
+
+.back-btn:hover { background: #F1F5F9; color: #1E293B; }
+
+.header-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+/* ─── Content ─────────────────────────────────────────────────────────── */
+
 .summary-content {
   max-width: 800px;
   margin: 0 auto;
-  padding: 24px var(--ps-gutter) 40px;
+  padding: 32px var(--ps-gutter) 48px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ps-section-gap);
 }
+
+/* ─── Intro ───────────────────────────────────────────────────────────── */
 
 .summary-intro {
-  display: grid;
-  gap: 8px;
-  justify-items: center;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
-.summary-intro > * {
+.intro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: var(--ps-radius-full);
+  background: rgba(236, 72, 153, 0.06);
+  color: #EC4899;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.intro-title {
+  font-size: clamp(24px, 3.5vw, 32px);
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.intro-subtitle {
+  font-size: 15px;
+  color: #64748B;
   margin: 0;
 }
+
+/* ─── Grid ────────────────────────────────────────────────────────────── */
 
 .selected-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   max-width: 640px;
+  margin: 0 auto;
 }
-@media (min-width: 600px) {
-  .selected-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-}
+
+@media (min-width: 600px) { .selected-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; } }
 
 .selected-item {
   position: relative;
-  border-radius: 12px;
+  border-radius: var(--ps-radius-md);
   overflow: hidden;
+  aspect-ratio: 1;
+}
+
+.selected-img {
+  border-radius: var(--ps-radius-md);
 }
 
 .remove-btn {
@@ -178,6 +256,7 @@ async function handleSubmit() {
   height: 24px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   border: none;
   cursor: pointer;
   display: flex;
@@ -186,9 +265,8 @@ async function handleSubmit() {
   opacity: 0;
   transition: opacity 0.2s ease;
 }
-.selected-item:hover .remove-btn {
-  opacity: 1;
-}
+
+.selected-item:hover .remove-btn { opacity: 1; }
 
 .item-number {
   position: absolute;
@@ -198,6 +276,7 @@ async function handleSubmit() {
   height: 22px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   color: white;
   font-size: 11px;
   font-weight: 700;
@@ -219,21 +298,69 @@ async function handleSubmit() {
   justify-content: center;
 }
 
-.confirm-section {
-  padding-bottom: 24px;
-}
-.confirm-card {
-  max-width: 520px;
+/* ─── Empty ───────────────────────────────────────────────────────────── */
+
+.empty-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  padding: 48px 24px;
+  gap: 12px;
 }
 
-.shimmer {
+.empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #94A3B8, #64748B);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.empty-title { font-size: 18px; font-weight: 700; color: #0F172A; margin: 0; }
+.empty-desc { font-size: 14px; color: #94A3B8; margin: 0; }
+
+/* ─── Confirm ─────────────────────────────────────────────────────────── */
+
+.confirm-card {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 32px;
+  text-align: center;
+  background: white;
+  border-radius: var(--ps-radius-2xl);
+  border: 1px solid var(--ps-border);
+  box-shadow: var(--ps-shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.confirm-card__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ps-gradient-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.confirm-title { font-size: 18px; font-weight: 700; color: #0F172A; margin: 0; }
+.confirm-desc { font-size: 14px; color: #64748B; margin: 0; line-height: 1.6; max-width: 360px; }
+
+.confirm-btn { margin-top: 8px; }
+
+.shimmer-placeholder {
+  width: 100%;
+  height: 100%;
   background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-}
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  animation: ps-shimmer 1.5s ease-in-out infinite;
 }
 </style>
