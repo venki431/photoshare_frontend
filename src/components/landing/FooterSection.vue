@@ -30,8 +30,8 @@
       <div class="footer__bottom">
         <span class="footer__copy">&copy; {{ year }} PhotoShare. All rights reserved.</span>
         <div class="footer__bottom-links">
-          <a href="#" class="footer__link">Privacy</a>
-          <a href="#" class="footer__link">Terms</a>
+          <router-link to="/privacy" class="footer__link">Privacy</router-link>
+          <router-link to="/terms" class="footer__link">Terms</router-link>
         </div>
       </div>
     </div>

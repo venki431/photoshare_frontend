@@ -57,6 +57,18 @@ const routes = [
     meta: { layout: 'client' },
     props: true,
   },
+  {
+    path: '/terms',
+    name: 'Terms',
+    component: () => import('@/views/legal/TermsView.vue'),
+    meta: { layout: 'blank' },
+  },
+  {
+    path: '/privacy',
+    name: 'Privacy',
+    component: () => import('@/views/legal/PrivacyView.vue'),
+    meta: { layout: 'blank' },
+  },
 ]
 
 const router = createRouter({

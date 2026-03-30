@@ -174,8 +174,8 @@
             <!-- Footer Terms -->
             <p class="login-terms">
               By signing in, you agree to our
-              <a href="#" class="terms-link">Terms of Service</a> and
-              <a href="#" class="terms-link">Privacy Policy</a>.
+              <router-link to="/terms" class="terms-link">Terms of Service</router-link> and
+              <router-link to="/privacy" class="terms-link">Privacy Policy</router-link>.
             </p>
           </div>
         </div>
