@@ -6,61 +6,140 @@
         <h1 class="text-h4 font-weight-bold">Projects</h1>
         <p class="text-body-2 text-medium-emphasis">{{ projectStore.totalProjects }} total projects</p>
       </div>
-      <v-btn color="primary" prepend-icon="mdi-plus" class="text-none" elevation="0" size="large" @click="createDialog = true">
+      <v-btn 
+        color="primary" 
+        prepend-icon="mdi-plus" 
+        class="text-none" 
+        elevation="0" 
+        size="large" 
+        @click="createDialog = true"
+      >
         New Project
       </v-btn>
     </div>
 
     <!-- Create Project Dialog -->
-    <v-dialog v-model="createDialog" max-width="520" persistent>
-      <v-card class="pa-6">
-        <div class="d-flex align-center justify-space-between mb-5">
-          <h3 class="text-h6 font-weight-bold">New Project</h3>
+    <v-dialog v-model="createDialog" max-width="560" persistent>
+      <v-card class="pa-8">
+        <div class="d-flex align-center justify-space-between mb-6">
+          <h3 class="text-h6 font-weight-bold">Create New Project</h3>
           <v-btn icon="mdi-close" size="small" variant="text" @click="resetAndClose" />
         </div>
-        <v-form ref="createFormRef" @submit.prevent="handleCreate">
+
+        <v-form 
+          ref="createFormRef" 
+          @submit.prevent="handleCreate" 
+          v-model="formValid"
+        >
+          <!-- Customer Image Upload -->
+          <div class="mb-7">
+            <div class="customer-image-upload d-flex flex-column align-center mx-auto">
+              <v-avatar
+                v-if="createForm.clientImagePreview"
+                size="128"
+                class="mb-3"
+              >
+                <v-img :src="createForm.clientImagePreview" cover />
+              </v-avatar>
+              <v-avatar
+                v-else
+                size="128"
+                color="grey-lighten-3"
+                class="mb-3"
+              >
+                <v-icon size="52" color="grey-lighten-1">mdi-account</v-icon>
+              </v-avatar>
+
+              <v-btn
+                color="primary"
+                variant="outlined"
+                size="small"
+                @click="triggerFileInput"
+                class="text-none"
+              >
+                <v-icon start>mdi-camera</v-icon>
+                {{ createForm.clientImagePreview ? 'Change Photo' : 'Add Customer Photo' }}
+              </v-btn>
+              <input
+                ref="fileInput"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+                @change="handleImageUpload"
+              />
+            </div>
+          </div>
+
+          <!-- Form Fields -->
           <v-text-field
             v-model="createForm.name"
             label="Project Name"
             placeholder="e.g. Sarah & James Wedding"
-            :rules="[v => !!v?.trim() || 'Project name is required']"
-            class="mb-1"
+            :rules="nameRules"
+            required
+            density="comfortable"
+            class="mb-5"
           />
+
           <v-select
             v-model="createForm.eventType"
             label="Event Type"
             :items="eventTypes"
-            :rules="[v => !!v || 'Event type is required']"
-            class="mb-1"
+            item-title="text"
+            item-value="value"
+            :rules="eventTypeRules"
+            required
+            density="comfortable"
+            class="mb-5"
           />
+
           <v-text-field
             v-model="createForm.clientName"
             label="Customer Name"
             placeholder="Full name"
-            class="mb-1"
+            :rules="clientNameRules"
+            required
+            density="comfortable"
+            class="mb-5"
           />
-          <v-text-field
-            v-model="createForm.clientEmail"
-            label="Customer Email"
-            placeholder="email@example.com"
-            type="email"
-            class="mb-1"
-          />
-          <v-text-field
-            v-model="createForm.clientMobile"
-            label="Customer Mobile"
-            placeholder="+91 98765-43210"
-            type="tel"
-            class="mb-1"
-          />
+
+          <v-row dense>
+            <v-col cols="12" sm="7">
+              <v-text-field
+                v-model="createForm.clientEmail"
+                label="Customer Email"
+                placeholder="email@example.com"
+                type="email"
+                density="comfortable"
+                class="mb-5"
+                :rules="emailRules"
+                hint="Optional"
+                persistent-hint
+              />
+            </v-col>
+            <v-col cols="12" sm="5">
+              <v-text-field
+                v-model="createForm.clientMobile"
+                label="Customer Mobile"
+                placeholder="+91 98765 43210"
+                type="tel"
+                :rules="mobileRules"
+                required
+                density="comfortable"
+                class="mb-5"
+              />
+            </v-col>
+          </v-row>
+
           <v-btn
             block
             color="primary"
             type="submit"
-            class="text-none mt-2"
+            class="text-none mt-6"
             elevation="0"
             size="large"
             :loading="creating"
+            :disabled="!formValid"
           >
             Create Project
           </v-btn>
@@ -71,23 +150,36 @@
     <!-- Filters & View Toggle -->
     <div class="ps-page-toolbar">
       <div class="ps-page-toolbar-main">
-      <v-text-field
-        v-model="search"
-        placeholder="Search projects..."
-        prepend-inner-icon="mdi-magnify"
-        density="compact"
-        hide-details
-        clearable
-        class="projects-search ps-toolbar-control"
-      />
-      <v-chip-group v-model="statusFilter" selected-class="text-primary" mandatory class="status-filter-group">
-        <v-chip filter value="all" size="small">All</v-chip>
-        <v-chip filter value="pending" size="small">Pending</v-chip>
-        <v-chip filter value="in_review" size="small">In Review</v-chip>
-        <v-chip filter value="completed" size="small">Completed</v-chip>
-      </v-chip-group>
+        <v-text-field
+          v-model="search"
+          placeholder="Search projects..."
+          prepend-inner-icon="mdi-magnify"
+          density="compact"
+          hide-details
+          clearable
+          class="projects-search ps-toolbar-control"
+        />
+        <v-chip-group 
+          v-model="statusFilter" 
+          selected-class="text-primary" 
+          mandatory 
+          class="status-filter-group"
+        >
+          <v-chip filter value="all" size="small">All</v-chip>
+          <v-chip filter value="pending" size="small">Pending</v-chip>
+          <v-chip filter value="in_review" size="small">In Review</v-chip>
+          <v-chip filter value="completed" size="small">Completed</v-chip>
+        </v-chip-group>
       </div>
-      <v-btn-toggle v-model="viewMode" density="compact" mandatory variant="outlined" divided rounded="lg" class="ps-toolbar-toggle">
+      <v-btn-toggle 
+        v-model="viewMode" 
+        density="compact" 
+        mandatory 
+        variant="outlined" 
+        divided 
+        rounded="lg" 
+        class="ps-toolbar-toggle"
+      >
         <v-btn value="grid" icon="mdi-view-grid-outline" size="small" />
         <v-btn value="list" icon="mdi-view-list-outline" size="small" />
       </v-btn-toggle>
@@ -104,7 +196,7 @@
       >
         <v-card class="project-card" :to="`/projects/${project.id}`" hover>
           <div class="project-cover">
-            <v-img :src="project.coverUrl" height="200" cover class="rounded-t-xl">
+            <v-img :src="project.coverImage" height="200" cover class="rounded-t-xl">
               <template #placeholder>
                 <v-sheet color="grey-lighten-3" height="200" class="d-flex align-center justify-center">
                   <v-progress-circular indeterminate color="grey-lighten-1" />
@@ -157,7 +249,7 @@
         >
           <template #prepend>
             <v-avatar size="56" rounded="lg" class="mr-4">
-              <v-img :src="project.coverUrl" cover />
+              <v-img :src="project.coverImage" cover />
             </v-avatar>
           </template>
           <v-list-item-title class="font-weight-bold mb-1">{{ project.name }}</v-list-item-title>
@@ -194,23 +286,89 @@ const search = ref('')
 const statusFilter = ref('all')
 const viewMode = ref('grid')
 
-// ─── Create Project Dialog ────────────────────────────────────────────────────
+// Create Project Dialog
 const createDialog = ref(false)
 const creating = ref(false)
 const createFormRef = ref(null)
+const fileInput = ref(null)
+const formValid = ref(false)
+
 const createForm = reactive({
   name: '',
   eventType: '',
   clientName: '',
   clientEmail: '',
   clientMobile: '',
+  clientImage: null,
+  clientImagePreview: null,
 })
 
-const eventTypes = ['wedding', 'birthday', 'corporate', 'engagement', 'portrait', 'other']
+const eventTypes = [
+  { text: 'Wedding', value: 'wedding' },
+  { text: 'Birthday', value: 'birthday' },
+  { text: 'Corporate', value: 'corporate' },
+  { text: 'Engagement', value: 'engagement' },
+  { text: 'Portrait', value: 'portrait' },
+  { text: 'Other', value: 'other' }
+]
 
-function resetAndClose() {
-  createDialog.value = false
-  Object.assign(createForm, { name: '', eventType: '', clientName: '', clientEmail: '', clientMobile: '' })
+// Validation Rules
+const nameRules = [
+  v => !!v?.trim() || 'Project name is required',
+  v => (v?.trim().length >= 3) || 'Project name must be at least 3 characters'
+]
+
+const eventTypeRules = [v => !!v || 'Please select an event type']
+
+const clientNameRules = [
+  v => !!v?.trim() || 'Customer name is required',
+  v => (v?.trim().length >= 2) || 'Please enter a valid name'
+]
+
+const emailRules = [
+  v => !v || /.+@.+\..+/.test(v) || 'Please enter a valid email address'
+]
+
+const mobileRules = [
+  v => !!v?.trim() || 'Customer mobile number is required',
+  v => /^[\d+\s-]{10,15}$/.test(v?.replace(/\s/g, '')) || 'Please enter a valid mobile number'
+]
+
+function triggerFileInput() {
+  fileInput.value?.click()
+}
+
+function compressImage(file, maxWidth = 512, quality = 0.7) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const scale = Math.min(1, maxWidth / Math.max(img.width, img.height))
+      const w = Math.round(img.width * scale)
+      const h = Math.round(img.height * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, w, h)
+      resolve(canvas.toDataURL('image/jpeg', quality))
+    }
+    img.src = url
+  })
+}
+
+async function handleImageUpload(e) {
+  const file = e.target.files[0]
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload a valid image file (JPEG, PNG, or WebP)')
+    return
+  }
+  const base64 = await compressImage(file)
+  createForm.clientImage = base64
+  createForm.clientImagePreview = base64
 }
 
 async function handleCreate() {
@@ -218,15 +376,44 @@ async function handleCreate() {
   if (!valid) return
 
   creating.value = true
+
   try {
-    const project = await projectStore.createProject({ ...createForm })
+    const payload = {
+      name: createForm.name.trim(),
+      eventType: createForm.eventType,
+      clientName: createForm.clientName.trim(),
+      clientMobile: createForm.clientMobile.trim(),
+    }
+    if (createForm.clientEmail?.trim()) {
+      payload.clientEmail = createForm.clientEmail.trim()
+    }
+    if (createForm.clientImage) {
+      payload.coverImage = createForm.clientImage
+    }
+
+    const project = await projectStore.createProject(payload)
+
     resetAndClose()
     router.push(`/projects/${project.id}`)
   } catch (err) {
-    console.error('Create failed:', err?.message)
+    console.error('Failed to create project:', err?.message || err)
   } finally {
     creating.value = false
   }
+}
+
+function resetAndClose() {
+  createDialog.value = false
+  Object.assign(createForm, {
+    name: '',
+    eventType: '',
+    clientName: '',
+    clientEmail: '',
+    clientMobile: '',
+    clientImage: null,
+    clientImagePreview: null,
+  })
+  if (fileInput.value) fileInput.value.value = ''
 }
 
 onMounted(() => {
@@ -249,18 +436,38 @@ function statusColor(status) {
   const map = { pending: 'warning', in_review: 'info', completed: 'success' }
   return map[status] || 'grey'
 }
+
 function statusLabel(status) {
   const map = { pending: 'Pending', in_review: 'In Review', completed: 'Completed' }
   return map[status] || status
 }
+
 function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric' 
+  })
 }
 </script>
 
 <style scoped>
 .projects-page {
   min-width: 0;
+}
+
+.customer-image-upload {
+  width: fit-content;
+}
+
+.customer-image-upload .v-avatar {
+  border: 4px solid #f5f5f5;
+  transition: all 0.25s ease;
+}
+
+.customer-image-upload .v-avatar:hover {
+  border-color: rgb(var(--v-theme-primary));
+  transform: scale(1.04);
 }
 
 .status-filter-group {
@@ -292,7 +499,9 @@ function formatDate(dateStr) {
   flex-direction: column;
 }
 
-.project-cover { position: relative; }
+.project-cover { 
+  position: relative; 
+}
 
 .project-meta {
   flex-wrap: wrap;
