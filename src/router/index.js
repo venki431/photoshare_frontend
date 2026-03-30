@@ -3,7 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   {
     path: '/',
-    redirect: '/login',
+    name: 'Landing',
+    component: () => import('@/views/LandingPage.vue'),
+    meta: { layout: 'blank' },
   },
   {
     path: '/login',
@@ -69,7 +71,7 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('ps_auth_token')
   if (to.meta.requiresAuth && !token) {
     next('/login')
-  } else if (to.path === '/login' && token) {
+  } else if ((to.path === '/login' || to.path === '/') && token) {
     next('/dashboard')
   } else {
     next()
