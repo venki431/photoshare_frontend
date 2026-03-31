@@ -26,13 +26,11 @@
         </button>
 
         <div class="preview-image-wrapper">
-          <v-img
+          <img
             v-if="image"
             :src="image.url"
-            max-height="85vh"
-            max-width="90vw"
-            contain
             class="preview-image"
+            :alt="image.filename"
           />
         </div>
 
@@ -196,9 +194,15 @@ function handleDelete() {
   display: flex;
   align-items: center;
   justify-content: center;
+  max-height: 85vh;
+  max-width: 90vw;
+  overflow: hidden;
 }
 
 .preview-image {
+  max-height: 85vh;
+  max-width: 90vw;
+  object-fit: contain;
   border-radius: var(--ps-radius-sm);
 }
 

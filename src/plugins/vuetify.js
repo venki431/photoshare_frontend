@@ -11,7 +11,7 @@ const photoshareTheme = {
     surface: '#FFFFFF',
     'surface-variant': '#F3F4F6',
     primary: '#4F46E5',
-    'primary-darken-1': '#4338CA',
+    'primary-darken-1': '#EF007A',
     secondary: '#0EA5E9',
     'secondary-darken-1': '#0284C7',
     error: '#EF4444',

@@ -158,7 +158,7 @@ function handleLogout() {
   position: fixed;
   top: 0;
   right: 0;
-  width: 60%;
+  width: 100%;
   height: 100vh;
   background: var(--ps-gradient-mesh);
   pointer-events: none;
