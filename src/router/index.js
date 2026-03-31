@@ -14,6 +14,12 @@ const routes = [
     meta: { layout: 'blank' },
   },
   {
+    path: '/signup',
+    name: 'Signup',
+    component: () => import('@/views/auth/SignupView.vue'),
+    meta: { layout: 'blank' },
+  },
+  {
     path: '/dashboard',
     component: () => import('@/layouts/DashboardLayout.vue'),
     meta: { requiresAuth: true },
@@ -83,7 +89,7 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('ps_auth_token')
   if (to.meta.requiresAuth && !token) {
     next('/login')
-  } else if ((to.path === '/login' || to.path === '/') && token) {
+  } else if (['/login', '/signup', '/'].includes(to.path) && token) {
     next('/dashboard')
   } else {
     next()

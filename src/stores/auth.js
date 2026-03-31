@@ -16,6 +16,20 @@ export const useAuthStore = defineStore('auth', () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   })
 
+  async function checkEmail(email) {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await authService.checkEmail(email)
+      return res.data.exists
+    } catch (err) {
+      error.value = err?.message || 'Failed to check email'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function sendOtp(email) {
     loading.value = true
     error.value = null
@@ -48,6 +62,23 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function signup(payload) {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await authService.signup(payload)
+      token.value = res.data.token
+      user.value = res.data.user
+      localStorage.setItem('ps_auth_token', token.value)
+      return true
+    } catch (err) {
+      error.value = err?.message || 'Signup failed'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   function logout() {
     token.value = null
     user.value = null
@@ -73,6 +104,6 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     user, token, loading, otpSent, error,
     isAuthenticated, userName, userInitials,
-    sendOtp, verifyOtp, logout, fetchUser,
+    checkEmail, sendOtp, verifyOtp, signup, logout, fetchUser,
   }
 })

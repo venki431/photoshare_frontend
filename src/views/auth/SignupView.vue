@@ -1,6 +1,6 @@
 <template>
-  <v-container fluid class="login-page pa-0">
-    <v-row no-gutters class="login-layout">
+  <v-container fluid class="signup-page pa-0">
+    <v-row no-gutters class="signup-layout">
       <!-- Left Hero Panel (Desktop only) -->
       <v-col cols="12" md="6" lg="6" class="d-none d-md-flex hero-panel">
         <div class="hero-bg">
@@ -13,72 +13,75 @@
         <div class="hero-content ps-animate-in">
           <div class="hero-badge">
             <v-icon size="16" color="white" class="mr-2">mdi-camera</v-icon>
-            Built for Professional Photographers
+            Join Thousands of Photographers
           </div>
 
           <h1 class="hero-title">
-            Client photo selection,<br />
-            <span class="text-gradient">made effortless.</span>
+            Start sharing your<br />
+            <span class="text-gradient">best work today.</span>
           </h1>
 
           <p class="hero-subtitle">
-            Share beautiful galleries with your clients, collect their favorite selections,
-            and deliver final images faster than ever before.
+            Create your free account, build stunning galleries, and let clients
+            pick their favorite shots — all in one seamless workflow.
           </p>
-
-          <div class="hero-stats">
-            <div class="hero-stat">
-              <div class="stat-number">2,400+</div>
-              <div class="stat-label">Photographers trust us</div>
-            </div>
-            <div class="hero-stat">
-              <div class="stat-number">180K+</div>
-              <div class="stat-label">Photos selected by clients</div>
-            </div>
-            <div class="hero-stat">
-              <div class="stat-number">98%</div>
-              <div class="stat-label">Client satisfaction rate</div>
-            </div>
-          </div>
 
           <div class="hero-features">
             <div class="feature-pill">
               <v-icon size="16" color="primary-darken-1">mdi-lightning-bolt</v-icon>
-              Auto compression
+              Free to start
             </div>
             <div class="feature-pill">
-              <v-icon size="16" color="primary-darken-1">mdi-heart</v-icon>
-              Client selection
+              <v-icon size="16" color="primary-darken-1">mdi-shield-check</v-icon>
+              Secure & private
             </div>
             <div class="feature-pill">
-              <v-icon size="16" color="primary-darken-1">mdi-share-variant</v-icon>
-              Beautiful galleries
+              <v-icon size="16" color="primary-darken-1">mdi-clock-fast</v-icon>
+              Setup in 2 minutes
             </div>
           </div>
         </div>
       </v-col>
 
-      <!-- Right Login Form Panel -->
-      <v-col cols="12" md="6" lg="6" class="login-column">
-        <div class="login-form-container">
+      <!-- Right Signup Form Panel -->
+      <v-col cols="12" md="6" lg="6" class="signup-column">
+        <div class="signup-form-container">
           <!-- Mobile Header -->
-          <div class="login-brand d-md-none">
+          <div class="signup-brand d-md-none">
             <div class="logo-mark-mobile">
               <span class="logo-letter">P</span>
             </div>
             <h2 class="brand-title">PhotoShare</h2>
           </div>
 
-          <div class="login-card ps-animate-in">
+          <div class="signup-card ps-animate-in">
+            <!-- Step indicator -->
+            <div class="step-indicator" v-if="!signupComplete">
+              <div class="step" :class="{ active: step === 1, done: step > 1 }">
+                <div class="step-dot">
+                  <v-icon v-if="step > 1" size="14" color="white">mdi-check</v-icon>
+                  <span v-else>1</span>
+                </div>
+                <span class="step-label">Your Info</span>
+              </div>
+              <div class="step-line" :class="{ active: step >= 2 }" />
+              <div class="step" :class="{ active: step === 2 }">
+                <div class="step-dot">
+                  <span>2</span>
+                </div>
+                <span class="step-label">Verify Email</span>
+              </div>
+            </div>
+
             <!-- Header -->
-            <div class="login-header">
-              <h2 class="login-title">
-                {{ otpSent ? 'Verify your email' : 'Welcome back' }}
+            <div class="signup-header">
+              <h2 class="signup-title">
+                {{ step === 1 ? 'Create your account' : 'Verify your email' }}
               </h2>
-              <p class="login-subtitle" v-html="
-                otpSent
-                  ? `We've sent a 6-digit code to <strong>${email}</strong>`
-                  : 'Sign in to manage your photography studio'
+              <p class="signup-subtitle" v-html="
+                step === 1
+                  ? 'Fill in your details to get started with PhotoShare'
+                  : `We've sent a 6-digit code to <strong>${form.email}</strong>`
               " />
             </div>
 
@@ -88,7 +91,7 @@
               type="error"
               variant="tonal"
               density="compact"
-              class="mb-6"
+              class="mb-5"
               closable
               rounded="lg"
               @click:close="errorMsg = ''"
@@ -96,19 +99,62 @@
               {{ errorMsg }}
             </v-alert>
 
-            <!-- Email Step -->
-            <v-form v-if="!otpSent" class="login-form" @submit.prevent="handleSendOtp">
+            <!-- Step 1: Profile Form -->
+            <v-form
+              v-if="step === 1"
+              ref="formRef"
+              class="signup-form"
+              @submit.prevent="handleSendOtp"
+              v-model="formValid"
+            >
               <v-text-field
-                v-model="email"
-                label="Business Email Address"
+                v-model="form.name"
+                label="Full Name"
+                prepend-inner-icon="mdi-account-outline"
+                :rules="nameRules"
+                autofocus
+                placeholder="John Doe"
+              />
+
+              <v-text-field
+                v-model="form.email"
+                label="Email Address"
                 type="email"
                 prepend-inner-icon="mdi-email-outline"
                 :rules="emailRules"
+                placeholder="you@yourstudio.com"
+              />
+
+              <v-text-field
+                v-model="form.phone_number"
+                label="Phone Number"
+                type="tel"
+                prepend-inner-icon="mdi-phone-outline"
+                :rules="phoneRules"
+                placeholder="+91 98765 43210"
+              />
+
+              <v-text-field
+                v-model="form.date_of_birth"
+                label="Date of Birth"
+                type="date"
+                prepend-inner-icon="mdi-calendar-outline"
+                :rules="dobRules"
+                :max="maxDob"
+              />
+
+              <v-textarea
+                v-model="form.address"
+                label="Address"
+                prepend-inner-icon="mdi-map-marker-outline"
+                :rules="addressRules"
+                placeholder="Your full address"
+                rows="2"
+                auto-grow
                 variant="outlined"
                 density="comfortable"
-                autofocus
-                placeholder="you@yourstudio.com"
                 rounded="lg"
+                hide-details="auto"
               />
 
               <v-btn
@@ -117,18 +163,18 @@
                 size="x-large"
                 color="primary"
                 :loading="authStore.loading"
-                :disabled="submitting"
-                class="text-none font-weight-medium ps-btn-glow"
+                :disabled="!formValid || submitting"
+                class="text-none font-weight-medium ps-btn-glow mt-2"
                 elevation="0"
                 rounded="lg"
               >
-                Continue with Email
+                Send Verification Code
                 <v-icon end size="18">mdi-arrow-right</v-icon>
               </v-btn>
             </v-form>
 
-            <!-- OTP Step -->
-            <v-form v-else class="login-form" @submit.prevent="handleVerifyOtp">
+            <!-- Step 2: OTP Verification -->
+            <v-form v-if="step === 2" class="signup-form" @submit.prevent="handleSignup">
               <div class="otp-section">
                 <p class="otp-instruction">Enter the 6-digit code sent to your email</p>
                 <div class="otp-grid">
@@ -161,13 +207,17 @@
                 rounded="lg"
               >
                 <v-icon start size="18">mdi-shield-check-outline</v-icon>
-                Verify & Sign In
+                Create Account
               </v-btn>
 
               <div class="otp-actions">
-                <button type="button" class="back-link" @click="resetToEmailStep">
+                <button
+                  type="button"
+                  class="back-link"
+                  @click="step = 1; otpDigits.fill(''); errorMsg = ''"
+                >
                   <v-icon size="14">mdi-arrow-left</v-icon>
-                  Use a different email
+                  Back to form
                 </button>
 
                 <button
@@ -182,13 +232,13 @@
             </v-form>
 
             <!-- Footer -->
-            <p class="login-terms">
-              Don't have an account?
-              <router-link to="/signup" class="terms-link font-weight-bold">Sign up</router-link>
+            <p class="signup-terms">
+              Already have an account?
+              <router-link to="/login" class="terms-link font-weight-bold">Sign in</router-link>
             </p>
 
-            <p class="login-terms mt-1">
-              By signing in, you agree to our
+            <p class="signup-terms mt-1">
+              By signing up, you agree to our
               <router-link to="/terms" class="terms-link">Terms of Service</router-link> and
               <router-link to="/privacy" class="terms-link">Privacy Policy</router-link>.
             </p>
@@ -207,54 +257,107 @@ import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 const router = useRouter()
 
-const email = ref('')
-const otpSent = ref(false)
+const step = ref(1)
+const formRef = ref(null)
+const formValid = ref(false)
 const errorMsg = ref('')
 const submitting = ref(false)
+const signupComplete = ref(false)
 const resendCooldown = ref(0)
+
+const form = reactive({
+  name: '',
+  email: '',
+  phone_number: '',
+  date_of_birth: '',
+  address: '',
+})
+
 const otpDigits = reactive(Array(6).fill(''))
 const otpInputRefs = reactive([])
-
 const otpCode = computed(() => otpDigits.join(''))
+
+// Max DOB: must be at least 13 years old
+const maxDob = computed(() => {
+  const d = new Date()
+  d.setFullYear(d.getFullYear() - 13)
+  return d.toISOString().split('T')[0]
+})
+
+// ─── Validation rules ───────────────────────────────────────────────────────
+
+const nameRules = [
+  v => !!v?.trim() || 'Full name is required',
+  v => v?.trim().length >= 2 || 'Name must be at least 2 characters',
+]
 
 const emailRules = [
   v => !!v?.trim() || 'Email is required',
   v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Please enter a valid email address',
 ]
 
+const phoneRules = [
+  v => !!v?.trim() || 'Phone number is required',
+  v => /^[+]?[\d\s()-]{7,20}$/.test(v) || 'Please enter a valid phone number',
+]
+
+const dobRules = [
+  v => !!v || 'Date of birth is required',
+  v => {
+    if (!v) return true
+    const age = (new Date() - new Date(v)) / (365.25 * 24 * 60 * 60 * 1000)
+    return age >= 13 || 'You must be at least 13 years old'
+  },
+]
+
+const addressRules = [
+  v => !!v?.trim() || 'Address is required',
+  v => v?.trim().length >= 5 || 'Address must be at least 5 characters',
+]
+
+// ─── Handlers ────────────────────────────────────────────────────────────────
+
 async function handleSendOtp() {
-  if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) return
+  const { valid } = await formRef.value.validate()
+  if (!valid) return
 
   errorMsg.value = ''
   submitting.value = true
   try {
-    // Check if user exists before sending OTP
-    const exists = await authStore.checkEmail(email.value)
-    if (!exists) {
-      errorMsg.value = 'No account found with this email. Please sign up first.'
+    // Check if email already exists
+    const exists = await authStore.checkEmail(form.email)
+    if (exists) {
+      errorMsg.value = 'An account with this email already exists. Please sign in instead.'
       return
     }
-    await authStore.sendOtp(email.value)
-    otpSent.value = true
+    await authStore.sendOtp(form.email)
+    step.value = 2
     startResendCooldown()
     await nextTick()
     otpInputRefs[0]?.focus()
   } catch (err) {
-    errorMsg.value = err?.message || 'Failed to send verification code. Please try again.'
+    errorMsg.value = err?.message || 'Failed to send verification code'
   } finally {
     submitting.value = false
   }
 }
 
-async function handleVerifyOtp() {
+async function handleSignup() {
   if (otpCode.value.length < 6) return
   errorMsg.value = ''
   submitting.value = true
   try {
-    await authStore.verifyOtp(email.value, otpCode.value)
+    await authStore.signup({
+      name: form.name,
+      email: form.email,
+      phone_number: form.phone_number,
+      date_of_birth: form.date_of_birth,
+      address: form.address,
+      otp: otpCode.value,
+    })
     router.push('/dashboard')
   } catch (err) {
-    errorMsg.value = err?.message || 'Invalid or expired verification code'
+    errorMsg.value = err?.message || 'Signup failed. Please try again.'
   } finally {
     submitting.value = false
   }
@@ -264,7 +367,7 @@ async function handleResendOtp() {
   if (resendCooldown.value > 0) return
   errorMsg.value = ''
   try {
-    await authStore.sendOtp(email.value)
+    await authStore.sendOtp(form.email)
     otpDigits.fill('')
     startResendCooldown()
     await nextTick()
@@ -282,6 +385,8 @@ function startResendCooldown() {
   }, 1000)
 }
 
+// ─── OTP input helpers ───────────────────────────────────────────────────────
+
 function onOtpInput(idx) {
   const val = otpDigits[idx]
   if (!/^\d$/.test(val)) {
@@ -290,7 +395,7 @@ function onOtpInput(idx) {
   }
   if (idx < 5) otpInputRefs[idx + 1]?.focus()
   // Auto-submit when all 6 digits filled
-  if (otpCode.value.length === 6) handleVerifyOtp()
+  if (otpCode.value.length === 6) handleSignup()
 }
 
 function onOtpBackspace(idx) {
@@ -306,24 +411,17 @@ function onOtpPaste(event) {
   }
   const focusIdx = Math.min(pasted.length, 5)
   otpInputRefs[focusIdx]?.focus()
-  if (pasted.length === 6) handleVerifyOtp()
-}
-
-function resetToEmailStep() {
-  otpSent.value = false
-  otpDigits.fill('')
-  errorMsg.value = ''
-  resendCooldown.value = 0
+  if (pasted.length === 6) handleSignup()
 }
 </script>
 
 <style scoped>
-.login-page {
+.signup-page {
   background: white;
   min-height: 100vh;
 }
 
-.login-layout { min-height: 100vh; }
+.signup-layout { min-height: 100vh; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    HERO PANEL
@@ -427,32 +525,6 @@ function resetToEmailStep() {
   margin-bottom: 48px;
 }
 
-.hero-stats {
-  display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
-  margin-bottom: 32px;
-}
-
-.hero-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stat-number {
-  font-size: 30px;
-  font-weight: 700;
-  color: white;
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
-  font-weight: 500;
-}
-
 .hero-features {
   display: flex;
   gap: 10px;
@@ -474,10 +546,10 @@ function resetToEmailStep() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   LOGIN FORM
+   SIGNUP FORM
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.login-column {
+.signup-column {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -486,16 +558,16 @@ function resetToEmailStep() {
   background: white;
 }
 
-.login-form-container {
+.signup-form-container {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   display: flex;
   flex-direction: column;
   gap: 32px;
 }
 
 /* Mobile Brand */
-.login-brand {
+.signup-brand {
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -526,21 +598,86 @@ function resetToEmailStep() {
   color: #0F172A;
 }
 
-/* Login Card */
-.login-card {
+/* Step Indicator */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 28px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  background: #E2E8F0;
+  color: #64748B;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-dot {
+  background: var(--ps-gradient-brand);
+  color: white;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.step.done .step-dot {
+  background: #10B981;
+  color: white;
+}
+
+.step-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94A3B8;
+  white-space: nowrap;
+}
+
+.step.active .step-label { color: #4F46E5; }
+.step.done .step-label { color: #10B981; }
+
+.step-line {
+  width: 80px;
+  height: 2px;
+  background: #E2E8F0;
+  margin: 0 12px;
+  margin-bottom: 22px;
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.step-line.active {
+  background: linear-gradient(90deg, #10B981, #4F46E5);
+}
+
+/* Signup Card */
+.signup-card {
   background: white;
   border-radius: var(--ps-radius-2xl);
-  padding: 44px 36px;
+  padding: 40px 36px;
   box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.08);
   border: 1px solid #F1F5F9;
 }
 
-.login-header {
-  margin-bottom: 28px;
+.signup-header {
+  margin-bottom: 24px;
   text-align: center;
 }
 
-.login-title {
+.signup-title {
   font-size: 26px;
   font-weight: 800;
   color: #0F172A;
@@ -548,17 +685,17 @@ function resetToEmailStep() {
   letter-spacing: -0.02em;
 }
 
-.login-subtitle {
+.signup-subtitle {
   font-size: 15px;
   color: #64748B;
   margin: 0;
   line-height: 1.5;
 }
 
-.login-form {
+.signup-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 /* OTP Section */
@@ -609,6 +746,7 @@ function resetToEmailStep() {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 16px;
 }
 
 .back-link,
@@ -638,7 +776,7 @@ function resetToEmailStep() {
 .resend-link:disabled:hover { background: none; }
 
 /* Terms */
-.login-terms {
+.signup-terms {
   margin-top: 24px;
   text-align: center;
   font-size: 12px;
@@ -646,7 +784,7 @@ function resetToEmailStep() {
   line-height: 1.6;
 }
 
-.login-terms:last-child { margin-top: 4px; }
+.signup-terms:last-child { margin-top: 4px; }
 
 .terms-link {
   color: var(--ps-primary);
@@ -666,9 +804,10 @@ function resetToEmailStep() {
 }
 
 @media (max-width: 600px) {
-  .login-column { padding: 24px 16px; }
-  .login-card { padding: 32px 24px; border-radius: var(--ps-radius-xl); }
+  .signup-column { padding: 24px 16px; }
+  .signup-card { padding: 28px 20px; border-radius: var(--ps-radius-xl); }
   .otp-input { width: 44px; height: 50px; font-size: 20px; }
   .otp-grid { gap: 8px; }
+  .step-line { width: 50px; }
 }
 </style>

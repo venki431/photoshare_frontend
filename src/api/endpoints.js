@@ -12,10 +12,13 @@
 export const ENDPOINTS = {
   // ── Auth ────────────────────────────────────────────────────────────────────
   AUTH: {
-    SEND_OTP:   '/auth/send-otp',
-    VERIFY_OTP: '/auth/verify-otp',
-    LOGOUT:     '/auth/logout',
-    ME:         '/auth/me',
+    CHECK_EMAIL: '/auth/check-email',
+    SEND_OTP:    '/auth/send-otp',
+    VERIFY_OTP:  '/auth/verify-otp',
+    SIGNUP:      '/auth/signup',
+    LOGOUT:      '/auth/logout',
+    ME:          '/auth/me',
+    UPDATE_ME:   '/auth/me',
   },
 
   // ── Projects ────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 /**
- * Auth Service — handles OTP login and session verification.
+ * Auth Service — handles OTP login, signup, and session verification.
  */
 
 import { apiClient, buildError } from '@/api/client'
@@ -15,6 +15,10 @@ async function safeCall(fn) {
 }
 
 export const authService = {
+  async checkEmail(email) {
+    return safeCall(() => apiClient.post(ENDPOINTS.AUTH.CHECK_EMAIL, { email }))
+  },
+
   async sendOtp(email) {
     return safeCall(() => apiClient.post(ENDPOINTS.AUTH.SEND_OTP, { email }))
   },
@@ -23,7 +27,17 @@ export const authService = {
     return safeCall(() => apiClient.post(ENDPOINTS.AUTH.VERIFY_OTP, { email, otp }))
   },
 
+  async signup({ name, email, phone_number, date_of_birth, address, otp }) {
+    return safeCall(() => apiClient.post(ENDPOINTS.AUTH.SIGNUP, {
+      name, email, phone_number, date_of_birth, address, otp,
+    }))
+  },
+
   async getMe() {
     return safeCall(() => apiClient.get(ENDPOINTS.AUTH.ME))
+  },
+
+  async updateMe(data) {
+    return safeCall(() => apiClient.put(ENDPOINTS.AUTH.UPDATE_ME, data))
   },
 }
