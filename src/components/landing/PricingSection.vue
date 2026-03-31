@@ -35,6 +35,21 @@
           </button>
         </div>
       </div>
+
+      <!-- Legal Disclaimers -->
+      <div v-scroll-reveal="{ delay: 400 }" class="pricing__disclaimers">
+        <p class="pricing__disclaimer-title">Important Information</p>
+        <ul class="pricing__disclaimer-list">
+          <li>All prices are in Indian Rupees (INR) and inclusive of applicable taxes unless stated otherwise. Prices are subject to change with 30 days' prior notice.</li>
+          <li>PhotoShare is an image <strong>sharing and selection platform only</strong> — it is not a storage, backup, or archival service. No original files are stored; only compressed versions are retained temporarily.</li>
+          <li>Selected images are automatically and permanently deleted from our servers <strong>2 months after client selection</strong>. No recovery is possible after deletion.</li>
+          <li>"Unlimited" features are subject to fair usage policies to ensure service quality for all users.</li>
+          <li>Subscription fees are non-refundable. Pro-rata refunds may be issued at PhotoShare's sole discretion for termination without cause.</li>
+          <li>PhotoShare does not guarantee any specific business outcomes, client acquisition, or revenue as a result of using the Service.</li>
+          <li>All gallery images are served in a compressed, watermarked format with anti-download protections. Image quality may differ from originals.</li>
+          <li>By subscribing, you agree to our <router-link to="/terms">Terms of Service</router-link> and <router-link to="/privacy">Privacy Policy</router-link>.</li>
+        </ul>
+      </div>
     </div>
   </section>
 </template>
@@ -234,6 +249,62 @@ const plans = [
 
     &:hover {
       box-shadow: 0 6px 24px rgba(124, 58, 237, 0.4);
+    }
+  }
+}
+
+.pricing__disclaimers {
+  margin-top: 48px;
+  padding: 28px 32px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+}
+
+.pricing__disclaimer-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 14px;
+}
+
+.pricing__disclaimer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  li {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.6;
+    padding-left: 16px;
+    position: relative;
+
+    &::before {
+      content: '*';
+      position: absolute;
+      left: 0;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    strong {
+      color: #64748b;
+    }
+
+    a {
+      color: #7c3aed;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 }

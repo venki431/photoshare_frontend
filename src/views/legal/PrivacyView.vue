@@ -27,7 +27,7 @@
       badge="Data Protection"
       icon="mdi-lock-check-outline"
       last-updated="March 31, 2026"
-      reading-time="12"
+      reading-time="15"
     />
 
     <!-- Quick Summary -->
@@ -49,15 +49,15 @@
           </div>
           <div class="summary-item">
             <v-icon size="18" color="#10B981">mdi-check-circle</v-icon>
-            <span><strong>Photos stay private</strong> — only accessible to you and your designated clients</span>
+            <span><strong>No originals stored</strong> — we only store compressed versions of your images</span>
           </div>
           <div class="summary-item">
             <v-icon size="18" color="#10B981">mdi-check-circle</v-icon>
-            <span><strong>Encrypted storage</strong> — your data is protected with industry-standard encryption</span>
+            <span><strong>Auto-deleted in 2 months</strong> — selected images are permanently removed after 2 months</span>
           </div>
           <div class="summary-item">
             <v-icon size="18" color="#10B981">mdi-check-circle</v-icon>
-            <span><strong>Delete anytime</strong> — request complete data removal at any time</span>
+            <span><strong>Sharing & selection only</strong> — not a backup or storage service</span>
           </div>
           <div class="summary-item">
             <v-icon size="18" color="#10B981">mdi-check-circle</v-icon>
@@ -106,7 +106,7 @@
           <ul>
             <li><strong>Account Information:</strong> Name, email address, phone number when you create an account</li>
             <li><strong>Profile Data:</strong> Business name, profile photo, and studio details</li>
-            <li><strong>Content:</strong> Photos, images, and files you upload to the platform</li>
+            <li><strong>Content (Compressed Only):</strong> When you upload photos and images, we process and store only compressed versions of your content. Original files are not retained on our servers</li>
             <li><strong>Project Data:</strong> Client names, contact details, event types, and project metadata you enter</li>
             <li><strong>Communications:</strong> Messages, feedback, and support requests you send us</li>
           </ul>
@@ -119,8 +119,8 @@
             <li><strong>Performance Data:</strong> Upload speeds, compression metrics, and error logs for service optimization</li>
           </ul>
 
-          <HighlightBox icon="mdi-eye-off-outline" variant="success" title="What we DON'T collect">
-            We do not scan, analyze, or process the content of your photographs for any purpose other than compression and delivery. We do not use facial recognition or AI analysis on your images.
+          <HighlightBox icon="mdi-eye-off-outline" variant="success" title="What we DON'T collect or store">
+            We do not store original high-resolution photographs. All uploaded content is compressed for viewing and selection purposes only. We do not scan, analyze, or process the content of your photographs using facial recognition or AI analysis. Original files are permanently discarded after compression.
           </HighlightBox>
         </LegalSection>
 
@@ -164,12 +164,16 @@
           <p>Protecting your data is a top priority. We implement multiple layers of security:</p>
           <ul>
             <li><strong>Encryption in Transit:</strong> All data transmitted between your browser and our servers is encrypted using TLS 1.2 or higher (HTTPS)</li>
-            <li><strong>Encryption at Rest:</strong> Stored data including photos and personal information is encrypted using AES-256 encryption</li>
+            <li><strong>Encryption at Rest:</strong> Stored data including compressed photos and personal information is encrypted using AES-256 encryption</li>
             <li><strong>Access Controls:</strong> Strict role-based access controls ensure only authorized personnel can access user data</li>
             <li><strong>Regular Audits:</strong> We conduct periodic security assessments and vulnerability testing</li>
             <li><strong>Secure Infrastructure:</strong> Our services are hosted on certified cloud infrastructure with SOC 2 compliance</li>
             <li><strong>Incident Response:</strong> We maintain an incident response plan and will notify affected users within 72 hours of any confirmed data breach, as required under the IT Act, 2000</li>
           </ul>
+
+          <HighlightBox icon="mdi-alert-outline" variant="warning" title="Important: Compressed Data Only">
+            PhotoShare stores only compressed versions of uploaded content — original files are never stored on our servers. While we employ industry-standard security for the compressed data we hold, PhotoShare is not responsible for the security, preservation, or availability of your original files. Users must maintain their own backups of all original content.
+          </HighlightBox>
 
           <HighlightBox icon="mdi-server-security" title="Data Location">
             Your data is primarily stored on servers located in India (Mumbai region) and Singapore, ensuring compliance with Indian data localization preferences. We do not transfer data outside of these regions without your explicit consent.
@@ -189,7 +193,38 @@
           </p>
         </LegalSection>
 
-        <LegalSection id="user-rights" title="Your Rights" icon="mdi-account-key-outline" number="6">
+        <LegalSection id="data-processing" title="Data Processing & Disclaimer" icon="mdi-database-alert-outline" number="6">
+          <p>
+            PhotoShare is designed exclusively as an <strong>image sharing and selection platform</strong>. By using the Service, you acknowledge and agree to the following data processing practices:
+          </p>
+          <ul>
+            <li><strong>Compression Processing:</strong> All images uploaded to the Platform are automatically compressed and converted to optimized formats. This process is irreversible — original quality cannot be restored from compressed files stored on our servers</li>
+            <li><strong>No Original Data Retention:</strong> PhotoShare does not store, retain, backup, or archive your original files in any form. Original files are permanently discarded immediately after compression processing is complete</li>
+            <li><strong>Temporary Storage Only:</strong> All compressed content stored on the Platform is temporary. Selected images are retained for a maximum of 2 months after client selection, after which they are automatically and permanently deleted</li>
+            <li><strong>No Liability for Data Loss:</strong> PhotoShare shall not be responsible, liable, or accountable for any loss, damage, corruption, or unavailability of original data, photographs, or files. Users acknowledge that the Platform does not function as a data storage, backup, or archival service</li>
+            <li><strong>User Responsibility:</strong> Users are solely responsible for maintaining independent backups of all original content, downloading any required data before automatic deletion, and ensuring their own data preservation practices are adequate</li>
+          </ul>
+          <HighlightBox icon="mdi-shield-alert-outline" variant="warning" title="Waiver of Claims">
+            By using PhotoShare, you expressly waive any and all claims against PhotoShare, its directors, officers, employees, and agents relating to the loss, corruption, deletion, or unavailability of any original data or content that was uploaded to, processed by, or deleted from the Platform. This includes data loss due to automatic deletion, system errors, or any other cause.
+          </HighlightBox>
+        </LegalSection>
+
+        <LegalSection id="content-protection" title="Content Protection & Watermarking" icon="mdi-shield-lock-outline" number="7">
+          <p>
+            PhotoShare applies technical content protection measures to safeguard uploaded content. This section explains how these measures interact with your data and privacy:
+          </p>
+          <ul>
+            <li><strong>Watermarking:</strong> All images displayed in client-facing galleries are automatically watermarked. Watermarks are applied as a visible overlay during image processing and are part of the compressed data stored on our servers</li>
+            <li><strong>Anti-Download Measures:</strong> The Platform implements browser-level protections (right-click disabling, drag prevention, download blocking) to deter unauthorized content capture. These measures operate client-side and do not involve additional data collection</li>
+            <li><strong>Reduced-Resolution Delivery:</strong> Gallery images are served in a compressed, watermarked, reduced-resolution format. This format is not suitable for high-quality reproduction and serves as an additional layer of content protection</li>
+            <li><strong>No Tracking via Watermarks:</strong> Watermarks applied by PhotoShare do not contain tracking pixels, hidden identifiers, or any steganographic data that could be used to identify or track individual viewers</li>
+          </ul>
+          <HighlightBox icon="mdi-information-outline" title="Protection Limitations">
+            While PhotoShare implements reasonable technical measures to protect content, no digital protection system is completely infallible. These measures are deterrents and not guarantees. PhotoShare does not collect additional personal data as part of these content protection measures.
+          </HighlightBox>
+        </LegalSection>
+
+        <LegalSection id="user-rights" title="Your Rights" icon="mdi-account-key-outline" number="8">
           <p>In accordance with the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011, and principles aligned with global data protection standards, you have the following rights:</p>
 
           <ul>
@@ -206,19 +241,32 @@
           </HighlightBox>
         </LegalSection>
 
-        <LegalSection id="data-retention" title="Data Retention" icon="mdi-clock-outline" number="7">
-          <p>We retain your information only as long as necessary for the purposes outlined in this policy:</p>
+        <LegalSection id="data-retention" title="Data Retention & Automatic Deletion" icon="mdi-clock-outline" number="9">
+          <p>We retain your information only as long as necessary for the purposes outlined in this policy. PhotoShare is a sharing and selection platform, not a storage or backup service.</p>
+
+          <p><strong>Content Retention:</strong></p>
+          <ul>
+            <li><strong>Original Files:</strong> Original uploaded files are <strong>never stored</strong>. They are compressed upon upload and the originals are permanently discarded</li>
+            <li><strong>Compressed Content (Selected Images):</strong> Once a client completes the image selection, the selected compressed images are retained for a maximum of <strong>2 (two) months</strong> from the date of selection. After this period, they are <strong>automatically and permanently deleted</strong> from all our servers without further notice</li>
+            <li><strong>Unselected Content:</strong> Images not selected by clients may be removed from the server at any time after the selection process is complete</li>
+            <li><strong>No Recovery:</strong> Once any content is deleted — whether automatically or manually — it cannot be recovered under any circumstances. PhotoShare does not maintain backups or archives of deleted content</li>
+          </ul>
+
+          <p><strong>Account & Other Data:</strong></p>
           <ul>
             <li><strong>Active Account Data:</strong> Retained for the duration of your active account</li>
-            <li><strong>Photos & Content:</strong> Retained until you delete them, or for 30 days after account deletion</li>
-            <li><strong>Account Data After Deletion:</strong> Permanently deleted within 30 days of account closure, including from all backup systems</li>
+            <li><strong>Account Data After Deletion:</strong> Permanently deleted within 30 days of account closure</li>
             <li><strong>Dormant Accounts:</strong> Accounts inactive for 12+ months may be archived after 30 days' notice</li>
             <li><strong>Usage Analytics:</strong> Aggregated, anonymized usage data may be retained indefinitely for service improvement</li>
             <li><strong>Legal Requirements:</strong> Certain data may be retained longer if required by Indian law (such as financial records under the Companies Act)</li>
           </ul>
+
+          <HighlightBox icon="mdi-alert-circle-outline" variant="warning" title="Critical: Download Before Expiry">
+            It is your sole responsibility to download any required content from the Platform before the 2-month automatic deletion period expires. PhotoShare shall not be liable for any loss or damage arising from the automatic deletion of content. We strongly recommend maintaining your own independent backups of all original files at all times.
+          </HighlightBox>
         </LegalSection>
 
-        <LegalSection id="children" title="Children's Privacy" icon="mdi-account-child-outline" number="8">
+        <LegalSection id="children" title="Children's Privacy" icon="mdi-account-child-outline" number="10">
           <p>
             PhotoShare is designed for professional photographers and is not intended for use by individuals under the age of 18 (or the age of majority in your jurisdiction).
           </p>
@@ -230,7 +278,7 @@
           </p>
         </LegalSection>
 
-        <LegalSection id="international" title="International Data Transfers" icon="mdi-earth" number="9">
+        <LegalSection id="international" title="International Data Transfers" icon="mdi-earth" number="11">
           <p>
             PhotoShare primarily stores and processes data within India. However, certain third-party services may process data in other jurisdictions (such as Singapore for CDN delivery).
           </p>
@@ -245,7 +293,25 @@
           </p>
         </LegalSection>
 
-        <LegalSection id="changes" title="Changes to This Policy" icon="mdi-file-edit-outline" number="10">
+        <LegalSection id="compliance" title="Regulatory Compliance" icon="mdi-certificate-outline" number="12">
+          <p>
+            PhotoShare is committed to full compliance with applicable data protection and privacy regulations:
+          </p>
+          <ul>
+            <li><strong>IT Act, 2000:</strong> Full compliance with the Information Technology Act and applicable rules including intermediary guidelines</li>
+            <li><strong>SPDI Rules, 2011:</strong> Adherence to Reasonable Security Practices and Procedures for handling Sensitive Personal Data or Information</li>
+            <li><strong>DPDPA, 2023:</strong> Preparing for compliance with the Digital Personal Data Protection Act as rules are notified</li>
+            <li><strong>Copyright Act, 1957:</strong> Technical protection measures (watermarks, anti-download) implemented as safeguards under Sections 65A/65B</li>
+            <li><strong>PCI-DSS:</strong> Payment processing through PCI-DSS compliant gateways — we never store payment card details</li>
+            <li><strong>SOC 2 Infrastructure:</strong> Hosted on certified cloud infrastructure meeting SOC 2 standards</li>
+            <li><strong>72-Hour Breach Notification:</strong> Committed to notifying affected users within 72 hours of any confirmed data breach</li>
+          </ul>
+          <HighlightBox icon="mdi-shield-check-outline" variant="success" title="Compliance Inquiries">
+            For compliance documentation, audit reports, or due diligence requests, contact our compliance team at <strong>compliance@photoshare.in</strong>.
+          </HighlightBox>
+        </LegalSection>
+
+        <LegalSection id="changes" title="Changes to This Policy" icon="mdi-file-edit-outline" number="13">
           <p>We may update this Privacy Policy from time to time. When we make material changes:</p>
           <ul>
             <li>We will notify you via email at least <strong>30 days before</strong> the changes take effect</li>
@@ -258,7 +324,7 @@
           </p>
         </LegalSection>
 
-        <LegalSection id="grievance" title="Grievance Officer" icon="mdi-account-tie-outline" number="11">
+        <LegalSection id="grievance" title="Grievance Officer" icon="mdi-account-tie-outline" number="14">
           <p>
             In accordance with the Information Technology Act, 2000, and the rules made thereunder, we have appointed a Grievance Officer to address any concerns or complaints regarding data processing:
           </p>
@@ -277,12 +343,12 @@
             </div>
             <div class="contact-row">
               <v-icon size="18" color="#7c3aed">mdi-map-marker-outline</v-icon>
-              <span><strong>Address:</strong> PhotoShare Technologies Pvt. Ltd., Bangalore, Karnataka, India</span>
+              <span><strong>Address:</strong> PhotoShare Technologies Pvt. Ltd., Hyderabad, Telangana, India</span>
             </div>
           </div>
         </LegalSection>
 
-        <LegalSection id="contact" title="Contact Us" icon="mdi-email-outline" number="12">
+        <LegalSection id="contact" title="Contact Us" icon="mdi-email-outline" number="15">
           <p>If you have questions, concerns, or requests regarding this Privacy Policy or our data practices, please reach out:</p>
           <div class="contact-card">
             <div class="contact-row">
@@ -347,10 +413,13 @@ const sections = [
   { id: 'cookies', title: 'Cookies & Tracking', icon: 'mdi-cookie-outline' },
   { id: 'data-security', title: 'Data Storage & Security', icon: 'mdi-shield-lock-outline' },
   { id: 'third-party', title: 'Third-Party Services', icon: 'mdi-link-variant' },
+  { id: 'data-processing', title: 'Data Processing & Disclaimer', icon: 'mdi-database-alert-outline' },
+  { id: 'content-protection', title: 'Content Protection & Watermarking', icon: 'mdi-shield-lock-outline' },
   { id: 'user-rights', title: 'Your Rights', icon: 'mdi-account-key-outline' },
-  { id: 'data-retention', title: 'Data Retention', icon: 'mdi-clock-outline' },
+  { id: 'data-retention', title: 'Data Retention & Deletion', icon: 'mdi-clock-outline' },
   { id: 'children', title: "Children's Privacy", icon: 'mdi-account-child-outline' },
   { id: 'international', title: 'International Transfers', icon: 'mdi-earth' },
+  { id: 'compliance', title: 'Regulatory Compliance', icon: 'mdi-certificate-outline' },
   { id: 'changes', title: 'Changes to Policy', icon: 'mdi-file-edit-outline' },
   { id: 'grievance', title: 'Grievance Officer', icon: 'mdi-account-tie-outline' },
   { id: 'contact', title: 'Contact Us', icon: 'mdi-email-outline' },

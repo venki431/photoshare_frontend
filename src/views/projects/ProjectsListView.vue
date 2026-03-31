@@ -5,12 +5,13 @@
       <div class="page-header__text">
         <h1 class="page-title">Projects</h1>
         <p class="page-subtitle">
-          {{ projectStore.totalProjects }} total project{{ projectStore.totalProjects !== 1 ? 's' : '' }}
+          {{ projectStore.totalProjects }} total project{{ projectStore.totalProjects !== 1 ? "s" : "" }}
           <span v-if="projectStore.pendingCount" class="subtitle-badge">
             &middot; {{ projectStore.pendingCount }} pending review
           </span>
         </p>
       </div>
+
       <v-btn
         color="primary"
         prepend-icon="mdi-plus"
@@ -36,7 +37,13 @@
             <h3 class="dialog-title">Create New Project</h3>
             <p class="dialog-subtitle">Set up a new gallery for your client</p>
           </div>
-          <v-btn icon="mdi-close" size="small" variant="text" class="dialog-close" @click="resetAndClose" />
+          <v-btn
+            icon="mdi-close"
+            size="small"
+            variant="text"
+            class="dialog-close"
+            @click="resetAndClose"
+          />
         </div>
 
         <v-form
@@ -45,7 +52,7 @@
           v-model="formValid"
           class="dialog-body"
         >
-          <!-- Customer Image Upload -->
+          <!-- Client Image Upload -->
           <div class="avatar-upload">
             <div class="avatar-upload__preview" @click="triggerFileInput">
               <v-avatar v-if="createForm.clientImagePreview" size="100">
@@ -59,7 +66,7 @@
               </div>
             </div>
             <button type="button" class="avatar-upload__btn" @click="triggerFileInput">
-              {{ createForm.clientImagePreview ? 'Change Photo' : 'Add Client Photo' }}
+              {{ createForm.clientImagePreview ? "Change Photo" : "Add Client Photo" }}
             </button>
             <input
               ref="fileInput"
@@ -72,62 +79,67 @@
 
           <!-- Form Fields -->
           <div class="form-grid">
-            <v-text-field
-              v-model="createForm.name"
-              label="Project Name"
-              placeholder="e.g. Sarah & James Wedding"
-              :rules="nameRules"
-              required
-              density="comfortable"
-              variant="outlined"
-            />
+            <div class="ps-field">
+              <v-text-field
+                v-model="createForm.name"
+                placeholder="Project Name"
+                :rules="nameRules"
+                required
+                variant="outlined"
+                class="ps-input"
+              />
+            </div>
 
-            <v-select
-              v-model="createForm.eventType"
-              label="Event Type"
-              :items="eventTypes"
-              item-title="text"
-              item-value="value"
-              :rules="eventTypeRules"
-              required
-              density="comfortable"
-              variant="outlined"
-            />
+            <div class="ps-field">
+              <v-select
+                v-model="createForm.eventType"
+                placeholder="Event Type"
+                :items="eventTypes"
+                item-title="text"
+                item-value="value"
+                :rules="eventTypeRules"
+                required
+                variant="outlined"
+                class="ps-input"
+              />
+            </div>
 
-            <v-text-field
-              v-model="createForm.clientName"
-              label="Customer Name"
-              placeholder="Full name"
-              :rules="clientNameRules"
-              required
-              density="comfortable"
-              variant="outlined"
-            />
+            <div class="ps-field">
+              <v-text-field
+                v-model="createForm.clientName"
+                placeholder="Customer Name"
+                :rules="clientNameRules"
+                required
+                variant="outlined"
+                class="ps-input"
+              />
+            </div>
 
             <div class="form-row">
-              <v-text-field
-                v-model="createForm.clientEmail"
-                label="Customer Email"
-                placeholder="email@example.com"
-                type="email"
-                density="comfortable"
-                variant="outlined"
-                :rules="emailRules"
-                hint="Optional"
-                persistent-hint
-                class="form-row__wide"
-              />
-              <v-text-field
-                v-model="createForm.clientMobile"
-                label="Customer Mobile"
-                placeholder="+91 98765 43210"
-                type="tel"
-                :rules="mobileRules"
-                required
-                density="comfortable"
-                variant="outlined"
-                class="form-row__narrow"
-              />
+              <div class="ps-field">
+                <v-text-field
+                  v-model="createForm.clientEmail"
+                  placeholder="Customer Email"
+                  type="email"
+                  :rules="emailRules"
+                  hint="Optional"
+                  persistent-hint
+                  variant="outlined"
+                  class="ps-input"
+                />
+              </div>
+
+              <div class="ps-field">
+                <v-text-field
+                  v-model="createForm.clientMobile"
+                  placeholder="Customer Mobile"
+                  type="tel"
+                  :rules="mobileRules"
+                  required
+                  variant="outlined"
+                  class="ps-input"
+                />
+              </div>
             </div>
           </div>
 
@@ -164,6 +176,7 @@
             <v-icon size="16">mdi-close</v-icon>
           </button>
         </div>
+
         <div class="filter-chips">
           <button
             v-for="f in filterOptions"
@@ -178,6 +191,7 @@
           </button>
         </div>
       </div>
+
       <div class="view-toggle">
         <button
           class="toggle-btn"
@@ -197,7 +211,10 @@
     </div>
 
     <!-- Grid View -->
-    <div v-if="viewMode === 'grid' && filteredProjects.length > 0" class="projects-grid ps-stagger">
+    <div
+      v-if="viewMode === 'grid' && filteredProjects.length > 0"
+      class="projects-grid ps-stagger"
+    >
       <ProjectCard
         v-for="project in filteredProjects"
         :key="project.id"
@@ -206,7 +223,10 @@
     </div>
 
     <!-- List View -->
-    <div v-else-if="viewMode === 'list' && filteredProjects.length > 0" class="project-list">
+    <div
+      v-else-if="viewMode === 'list' && filteredProjects.length > 0"
+      class="project-list"
+    >
       <router-link
         v-for="project in filteredProjects"
         :key="project.id"
@@ -219,7 +239,8 @@
         <div class="list-item__info">
           <div class="list-item__name">{{ project.name }}</div>
           <div class="list-item__meta">
-            {{ project.imageCount }} photos &middot; {{ project.selectedCount }} selected &middot; {{ formatDate(project.createdAt) }}
+            {{ project.imageCount }} photos &middot; {{ project.selectedCount }} selected
+            &middot; {{ formatDate(project.createdAt) }}
           </div>
         </div>
         <StatusBadge :status="project.status" />
@@ -241,7 +262,7 @@
           color="primary"
           size="small"
           class="text-none"
-          @click="search = ''; statusFilter = 'all'"
+          @click="clearFilters"
         >
           Clear Filters
         </v-btn>
@@ -251,161 +272,186 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useProjectStore } from '@/stores/projects'
-import ProjectCard from '@/components/ui/ProjectCard.vue'
-import StatusBadge from '@/components/ui/StatusBadge.vue'
-import EmptyState from '@/components/ui/EmptyState.vue'
+import { ref, reactive, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useProjectStore } from "@/stores/projects";
+import ProjectCard from "@/components/ui/ProjectCard.vue";
+import StatusBadge from "@/components/ui/StatusBadge.vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
 
-const router = useRouter()
-const projectStore = useProjectStore()
+const router = useRouter();
+const projectStore = useProjectStore();
 
-const search = ref('')
-const statusFilter = ref('all')
-const viewMode = ref('grid')
+const search = ref("");
+const statusFilter = ref("all");
+const viewMode = ref("grid");
 
 const filterOptions = computed(() => [
-  { label: 'All', value: 'all', count: projectStore.totalProjects },
-  { label: 'Pending', value: 'pending', dot: true, count: projectStore.pendingCount },
-  { label: 'In Review', value: 'in_review', dot: true, count: projectStore.inReviewCount },
-  { label: 'Completed', value: 'completed', dot: true, count: projectStore.completedCount },
-])
+  { label: "All", value: "all", count: projectStore.totalProjects },
+  { label: "Pending", value: "pending", dot: true, count: projectStore.pendingCount },
+  { label: "In Review", value: "in_review", dot: true, count: projectStore.inReviewCount },
+  { label: "Completed", value: "completed", dot: true, count: projectStore.completedCount },
+]);
 
 // Create Project Dialog
-const createDialog = ref(false)
-const creating = ref(false)
-const createFormRef = ref(null)
-const fileInput = ref(null)
-const formValid = ref(false)
+const createDialog = ref(false);
+const creating = ref(false);
+const createFormRef = ref(null);
+const fileInput = ref(null);
+const formValid = ref(false);
 
 const createForm = reactive({
-  name: '',
-  eventType: '',
-  clientName: '',
-  clientEmail: '',
-  clientMobile: '',
+  name: "",
+  eventType: "",
+  clientName: "",
+  clientEmail: "",
+  clientMobile: "",
   clientImage: null,
   clientImagePreview: null,
-})
+});
 
 const eventTypes = [
-  { text: 'Wedding', value: 'wedding' },
-  { text: 'Birthday', value: 'birthday' },
-  { text: 'Corporate', value: 'corporate' },
-  { text: 'Engagement', value: 'engagement' },
-  { text: 'Portrait', value: 'portrait' },
-  { text: 'Other', value: 'other' }
-]
+  { text: "Wedding", value: "wedding" },
+  { text: "Birthday", value: "birthday" },
+  { text: "Corporate", value: "corporate" },
+  { text: "Engagement", value: "engagement" },
+  { text: "Portrait", value: "portrait" },
+  { text: "Other", value: "other" },
+];
 
 const nameRules = [
-  v => !!v?.trim() || 'Project name is required',
-  v => (v?.trim().length >= 3) || 'Project name must be at least 3 characters'
-]
-const eventTypeRules = [v => !!v || 'Please select an event type']
+  (v) => !!v?.trim() || "Project name is required",
+  (v) => v?.trim().length >= 3 || "Project name must be at least 3 characters",
+];
+const eventTypeRules = [(v) => !!v || "Please select an event type"];
 const clientNameRules = [
-  v => !!v?.trim() || 'Customer name is required',
-  v => (v?.trim().length >= 2) || 'Please enter a valid name'
-]
+  (v) => !!v?.trim() || "Customer name is required",
+  (v) => v?.trim().length >= 2 || "Please enter a valid name",
+];
 const emailRules = [
-  v => !v || /.+@.+\..+/.test(v) || 'Please enter a valid email address'
-]
+  (v) => !v || /.+@.+\..+/.test(v) || "Please enter a valid email address",
+];
 const mobileRules = [
-  v => !!v?.trim() || 'Customer mobile number is required',
-  v => /^[\d+\s-]{10,15}$/.test(v?.replace(/\s/g, '')) || 'Please enter a valid mobile number'
-]
+  (v) => !!v?.trim() || "Customer mobile number is required",
+  (v) =>
+    /^[\d+\s-]{10,15}$/.test(v?.replace(/\s/g, "")) ||
+    "Please enter a valid mobile number",
+];
 
-function triggerFileInput() { fileInput.value?.click() }
+function triggerFileInput() {
+  fileInput.value?.click();
+}
 
 function compressImage(file, maxWidth = 512, quality = 0.7) {
   return new Promise((resolve) => {
-    const img = new Image()
-    const url = URL.createObjectURL(file)
+    const img = new Image();
+    const url = URL.createObjectURL(file);
     img.onload = () => {
-      URL.revokeObjectURL(url)
-      const scale = Math.min(1, maxWidth / Math.max(img.width, img.height))
-      const w = Math.round(img.width * scale)
-      const h = Math.round(img.height * scale)
-      const canvas = document.createElement('canvas')
-      canvas.width = w
-      canvas.height = h
-      const ctx = canvas.getContext('2d')
-      ctx.drawImage(img, 0, 0, w, h)
-      resolve(canvas.toDataURL('image/jpeg', quality))
-    }
-    img.src = url
-  })
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxWidth / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.src = url;
+  });
 }
 
 async function handleImageUpload(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  if (!file.type.startsWith('image/')) return
-  const base64 = await compressImage(file)
-  createForm.clientImage = base64
-  createForm.clientImagePreview = base64
+  const file = e.target.files[0];
+  if (!file || !file.type.startsWith("image/")) return;
+
+  const base64 = await compressImage(file);
+  createForm.clientImage = base64;
+  createForm.clientImagePreview = base64;
 }
 
 async function handleCreate() {
-  const { valid } = await createFormRef.value.validate()
-  if (!valid) return
-  creating.value = true
+  const { valid } = await createFormRef.value.validate();
+  if (!valid) return;
+
+  creating.value = true;
   try {
     const payload = {
       name: createForm.name.trim(),
       eventType: createForm.eventType,
       clientName: createForm.clientName.trim(),
       clientMobile: createForm.clientMobile.trim(),
-    }
-    if (createForm.clientEmail?.trim()) payload.clientEmail = createForm.clientEmail.trim()
-    if (createForm.clientImage) payload.coverImage = createForm.clientImage
-    const project = await projectStore.createProject(payload)
-    resetAndClose()
-    router.push(`/projects/${project.id}`)
+    };
+
+    if (createForm.clientEmail?.trim()) payload.clientEmail = createForm.clientEmail.trim();
+    if (createForm.clientImage) payload.coverImage = createForm.clientImage;
+
+    const project = await projectStore.createProject(payload);
+    resetAndClose();
+    router.push(`/projects/${project.id}`);
   } catch (err) {
-    console.error('Failed to create project:', err?.message || err)
+    console.error("Failed to create project:", err);
   } finally {
-    creating.value = false
+    creating.value = false;
   }
 }
 
 function resetAndClose() {
-  createDialog.value = false
+  createDialog.value = false;
   Object.assign(createForm, {
-    name: '', eventType: '', clientName: '', clientEmail: '', clientMobile: '',
-    clientImage: null, clientImagePreview: null,
-  })
-  if (fileInput.value) fileInput.value.value = ''
+    name: "",
+    eventType: "",
+    clientName: "",
+    clientEmail: "",
+    clientMobile: "",
+    clientImage: null,
+    clientImagePreview: null,
+  });
+  fileInput.value && (fileInput.value.value = "");
 }
 
-onMounted(() => { projectStore.fetchProjects().catch(() => {}) })
+function clearFilters() {
+  search.value = "";
+  statusFilter.value = "all";
+}
+
+onMounted(() => {
+  projectStore.fetchProjects().catch(() => {});
+});
 
 const filteredProjects = computed(() => {
-  let list = projectStore.projects
-  if (statusFilter.value !== 'all') list = list.filter(p => p.status === statusFilter.value)
-  if (search.value) {
-    const q = search.value.toLowerCase()
-    list = list.filter(p => p.name.toLowerCase().includes(q))
+  let list = projectStore.projects;
+
+  if (statusFilter.value !== "all") {
+    list = list.filter((p) => p.status === statusFilter.value);
   }
-  return list
-})
+
+  if (search.value) {
+    const q = search.value.toLowerCase();
+    list = list.filter((p) => p.name.toLowerCase().includes(q));
+  }
+
+  return list;
+});
 
 function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 </script>
 
 <style scoped>
+/* ====================== LAYOUT ====================== */
 .projects-page {
   display: flex;
   flex-direction: column;
   gap: var(--ps-section-gap);
   min-width: 0;
 }
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   PAGE HEADER
-   ═══════════════════════════════════════════════════════════════════════════ */
 
 .page-header {
   display: flex;
@@ -418,31 +464,27 @@ function formatDate(dateStr) {
 .page-title {
   font-size: clamp(24px, 3vw, 32px);
   font-weight: 800;
-  color: #0F172A;
+  color: #0f172a;
   margin: 0;
   letter-spacing: -0.02em;
 }
 
 .page-subtitle {
   font-size: 14px;
-  color: #94A3B8;
+  color: #94a3b8;
   margin: 4px 0 0;
 }
 
 .subtitle-badge {
-  color: #F59E0B;
+  color: #f59e0b;
   font-weight: 600;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   CREATE DIALOG
-   ═══════════════════════════════════════════════════════════════════════════ */
-
+/* ====================== CREATE DIALOG ====================== */
 .create-dialog {
   border-radius: var(--ps-radius-2xl) !important;
-  overflow: hidden;
   box-shadow: var(--ps-shadow-xl) !important;
-  border: none !important;
+  overflow: hidden;
 }
 
 .dialog-header {
@@ -466,13 +508,13 @@ function formatDate(dateStr) {
 .dialog-title {
   font-size: 18px;
   font-weight: 700;
-  color: #0F172A;
+  color: #0f172a;
   margin: 0;
 }
 
 .dialog-subtitle {
   font-size: 13px;
-  color: #94A3B8;
+  color: #94a3b8;
   margin: 2px 0 0;
 }
 
@@ -502,8 +544,8 @@ function formatDate(dateStr) {
   border-radius: 50%;
   overflow: hidden;
   cursor: pointer;
-  border: 3px solid #F1F5F9;
-  transition: border-color var(--ps-duration-fast);
+  border: 3px solid #f1f5f9;
+  transition: border-color 0.2s ease;
 }
 
 .avatar-upload__preview:hover {
@@ -513,7 +555,7 @@ function formatDate(dateStr) {
 .avatar-upload__placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #F1F5F9, #E2E8F0);
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -527,7 +569,7 @@ function formatDate(dateStr) {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity var(--ps-duration-fast);
+  transition: opacity 0.2s ease;
 }
 
 .avatar-upload__preview:hover .avatar-upload__overlay {
@@ -543,35 +585,29 @@ function formatDate(dateStr) {
   cursor: pointer;
   padding: 4px 8px;
   border-radius: var(--ps-radius-sm);
-  transition: background var(--ps-duration-fast);
 }
 
 .avatar-upload__btn:hover {
   background: rgba(79, 70, 229, 0.06);
 }
 
+/* Form */
 .form-grid {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 18px;
 }
 
 .form-row {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
-.form-row__wide { flex: 7; }
-.form-row__narrow { flex: 5; }
-
-.dialog-submit {
-  margin-top: 8px;
+.form-row > * {
+  flex: 1;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   TOOLBAR
-   ═══════════════════════════════════════════════════════════════════════════ */
-
+/* ====================== TOOLBAR ====================== */
 .toolbar {
   display: flex;
   align-items: center;
@@ -589,7 +625,6 @@ function formatDate(dateStr) {
   flex-wrap: wrap;
 }
 
-/* Search */
 .search-wrapper {
   position: relative;
   flex: 1;
@@ -602,7 +637,7 @@ function formatDate(dateStr) {
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94A3B8;
+  color: #94a3b8;
   pointer-events: none;
 }
 
@@ -614,14 +649,8 @@ function formatDate(dateStr) {
   border-radius: var(--ps-radius-lg);
   background: white;
   font-size: 14px;
-  font-family: inherit;
   outline: none;
-  transition: all var(--ps-duration-fast);
-  color: #1E293B;
-}
-
-.search-input::placeholder {
-  color: #CBD5E1;
+  transition: all 0.2s ease;
 }
 
 .search-input:focus {
@@ -638,12 +667,9 @@ function formatDate(dateStr) {
   height: 24px;
   border-radius: 50%;
   border: none;
-  background: #F1F5F9;
+  background: #f1f5f9;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748B;
+  color: #64748b;
 }
 
 /* Filter Chips */
@@ -658,21 +684,20 @@ function formatDate(dateStr) {
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  border-radius: var(--ps-radius-full);
+  border-radius: 9999px;
   border: 1px solid var(--ps-border);
   background: white;
   font-size: 13px;
   font-weight: 500;
-  color: #64748B;
+  color: #64748b;
   cursor: pointer;
-  transition: all var(--ps-duration-fast);
-  font-family: inherit;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .filter-chip:hover {
-  border-color: #CBD5E1;
-  background: #F8FAFC;
+  border-color: #cbd5e1;
+  background: #f8fafc;
 }
 
 .filter-chip--active {
@@ -688,15 +713,15 @@ function formatDate(dateStr) {
   border-radius: 50%;
 }
 
-.filter-dot--pending { background: #F59E0B; }
-.filter-dot--in_review { background: #3B82F6; }
-.filter-dot--completed { background: #10B981; }
+.filter-dot--pending { background: #f59e0b; }
+.filter-dot--in_review { background: #3b82f6; }
+.filter-dot--completed { background: #10b981; }
 
 .filter-count {
   font-size: 11px;
   font-weight: 600;
   padding: 1px 6px;
-  border-radius: var(--ps-radius-full);
+  border-radius: 9999px;
   background: rgba(0, 0, 0, 0.04);
 }
 
@@ -720,11 +745,8 @@ function formatDate(dateStr) {
   border: none;
   background: white;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #94A3B8;
-  transition: all var(--ps-duration-fast);
+  color: #94a3b8;
+  transition: all 0.2s ease;
 }
 
 .toggle-btn + .toggle-btn {
@@ -736,27 +758,12 @@ function formatDate(dateStr) {
   color: var(--ps-primary);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PROJECTS GRID
-   ═══════════════════════════════════════════════════════════════════════════ */
-
+/* ====================== PROJECT VIEWS ====================== */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
-
-@media (max-width: 960px) {
-  .projects-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 600px) {
-  .projects-grid { grid-template-columns: 1fr; }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   LIST VIEW
-   ═══════════════════════════════════════════════════════════════════════════ */
 
 .project-list {
   display: flex;
@@ -774,62 +781,113 @@ function formatDate(dateStr) {
   padding: 16px 20px;
   text-decoration: none;
   color: inherit;
-  transition: background var(--ps-duration-fast);
-  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .list-item + .list-item {
-  border-top: 1px solid #F1F5F9;
+  border-top: 1px solid #f1f5f9;
 }
 
 .list-item:hover {
-  background: #FAFBFC;
-}
-
-.list-item__avatar {
-  flex-shrink: 0;
-  border-radius: var(--ps-radius-md) !important;
-  overflow: hidden;
-}
-
-.list-item__info {
-  flex: 1;
-  min-width: 0;
+  background: #fafbfc;
 }
 
 .list-item__name {
   font-size: 14px;
   font-weight: 600;
-  color: #1E293B;
+  color: #1e293b;
   margin-bottom: 2px;
 }
 
 .list-item__meta {
   font-size: 13px;
-  color: #94A3B8;
+  color: #94a3b8;
 }
 
 .list-item__arrow {
-  color: #CBD5E1;
+  color: #cbd5e1;
   flex-shrink: 0;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ====================== PREMIUM FORM STYLING ====================== */
+:deep(.ps-input .v-field) {
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  background: #ffffff;
+  min-height: 48px;
+}
 
+:deep(.ps-input .v-field--variant-outlined) {
+  border-color: #e2e8f0;
+}
+
+:deep(.ps-input .v-field:hover) {
+  border-color: #cbd5e1;
+  background: #fafbff;
+}
+
+:deep(.ps-input .v-field--active) {
+  border-color: var(--ps-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+:deep(.ps-input .v-label) {
+  font-size: 14px;
+  color: #94a3b8;
+  transition: all 0.2s ease;
+}
+
+:deep(.ps-input .v-field--active .v-label),
+:deep(.ps-input .v-field--dirty .v-label) {
+  color: var(--ps-primary);
+  font-weight: 600;
+  transform: translateY(-10px) scale(0.85);
+}
+
+:deep(.ps-input .v-field--error) {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+}
+
+:deep(.v-messages) {
+  min-height: 16px;
+  margin-top: 4px;
+}
+
+/* ====================== RESPONSIVE ====================== */
 @media (max-width: 960px) {
-  .search-wrapper { max-width: none; }
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 600px) {
-  .page-header { flex-direction: column; align-items: stretch; }
-  .toolbar__main { flex-direction: column; align-items: stretch; }
-  .search-wrapper { min-width: 0; }
-  .filter-chips { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
-  .form-row { flex-direction: column; gap: 4px; }
-  .form-row__wide, .form-row__narrow { flex: 1; }
-  .dialog-header { padding: 24px 20px 0; }
-  .dialog-body { padding: 20px 20px 24px; }
+  .page-header,
+  .toolbar__main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-wrapper {
+    max-width: none;
+    min-width: 0;
+  }
+
+  .filter-chips {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .dialog-header,
+  .dialog-body {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 }
 </style>

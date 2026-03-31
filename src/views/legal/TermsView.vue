@@ -27,7 +27,7 @@
       badge="Legal Agreement"
       icon="mdi-file-document-check-outline"
       last-updated="March 31, 2026"
-      reading-time="10"
+      reading-time="20"
     />
 
     <!-- Quick Summary -->
@@ -49,15 +49,15 @@
           </div>
           <div class="summary-item">
             <v-icon size="18" color="#10B981">mdi-check-circle</v-icon>
-            <span><strong>Your data is yours</strong> — delete your account anytime, we'll remove everything</span>
+            <span><strong>No originals stored</strong> — we only store compressed versions, never your original files</span>
           </div>
           <div class="summary-item">
             <v-icon size="18" color="#10B981">mdi-check-circle</v-icon>
-            <span><strong>No hidden charges</strong> — pricing is transparent and clearly stated</span>
+            <span><strong>Auto-deletion</strong> — selected images are removed from our servers after 2 months</span>
           </div>
           <div class="summary-item">
             <v-icon size="18" color="#10B981">mdi-check-circle</v-icon>
-            <span><strong>Fair usage</strong> — use the service responsibly and respect others' rights</span>
+            <span><strong>Your responsibility</strong> — always keep backups of your original data</span>
           </div>
           <div class="summary-item">
             <v-icon size="18" color="#10B981">mdi-check-circle</v-icon>
@@ -139,30 +139,36 @@
         </LegalSection>
 
         <LegalSection id="use-of-service" title="Use of Service" icon="mdi-laptop-account" number="4">
-          <p>PhotoShare provides a platform for professional photographers to:</p>
+          <p>PhotoShare is a platform exclusively designed for <strong>sharing and selecting images</strong>. The platform enables professional photographers to:</p>
           <ul>
-            <li>Upload, compress, and organize event photographs</li>
-            <li>Create shareable galleries for client viewing</li>
-            <li>Enable clients to select, comment on, and submit photo preferences</li>
-            <li>Manage project workflows from upload to final delivery</li>
+            <li>Upload and share compressed event photographs with clients</li>
+            <li>Create shareable galleries for client viewing and selection</li>
+            <li>Enable clients to browse, select, and submit their preferred images</li>
+            <li>Facilitate the image selection workflow between photographers and clients</li>
           </ul>
+          <HighlightBox icon="mdi-alert-outline" variant="warning" title="Important: Not a Storage or Backup Service">
+            PhotoShare is <strong>not a cloud storage, backup, or archival service</strong>. The Platform is designed solely for the temporary sharing and selection of images. Users must not rely on PhotoShare as a means of storing, preserving, or backing up their photographs or any other data. You are solely responsible for maintaining your own backups and copies of all original files.
+          </HighlightBox>
           <p>
-            You may use the Service only for its intended purpose. The Service is provided on an "as-is" and "as-available" basis. We strive for 99.9% uptime but do not guarantee uninterrupted access. Scheduled maintenance windows will be communicated in advance via email.
+            You may use the Service only for its intended purpose. The Service is provided on an "as-is" and "as-available" basis. We strive for high availability but do not guarantee uninterrupted access. Scheduled maintenance windows will be communicated in advance via email.
           </p>
         </LegalSection>
 
         <LegalSection id="content-ownership" title="Content Ownership" icon="mdi-copyright" number="5">
           <HighlightBox icon="mdi-camera-outline" variant="success" title="You own your photos">
-            PhotoShare does not claim any ownership rights over the photographs, images, or other content you upload to the Platform. Your content remains entirely yours.
+            PhotoShare does not claim any ownership rights over the photographs, images, or other content you upload to the Platform. Your content remains entirely yours. However, PhotoShare is not responsible for the safekeeping, integrity, or availability of your original content.
           </HighlightBox>
           <p>By uploading content, you grant PhotoShare a limited, non-exclusive, royalty-free license to:</p>
           <ul>
-            <li>Store, process, compress, and display your content as necessary to provide the Service</li>
-            <li>Generate thumbnails and optimized versions for gallery viewing</li>
+            <li><strong>Compress, process, and store</strong> your content in a reduced-quality format necessary to provide the Service</li>
+            <li>Generate thumbnails and optimized versions for gallery viewing and selection</li>
             <li>Share content with designated clients via gallery links you create</li>
           </ul>
+          <HighlightBox icon="mdi-alert-circle-outline" variant="warning" title="No Original Data Stored">
+            PhotoShare does <strong>not store original files</strong>. All uploaded content is compressed and processed into a reduced-quality format suitable for viewing and selection purposes. The original high-resolution files are <strong>never retained</strong> on our servers. You acknowledge and agree that you are solely responsible for maintaining copies of your original files. PhotoShare shall not be held liable for any loss, corruption, or unavailability of original data under any circumstances.
+          </HighlightBox>
           <p>
-            This license is solely for the purpose of operating and improving the Service. We will <strong>never sell, sublicense, or use your content for advertising</strong> without your explicit written consent. This license terminates when you delete your content or your account.
+            This license is solely for the purpose of operating the Service. We will <strong>never sell, sublicense, or use your content for advertising</strong> without your explicit written consent. This license terminates when your content is deleted from the Platform, whether by you, by automatic deletion policy, or upon account termination.
           </p>
         </LegalSection>
 
@@ -173,16 +179,65 @@
             <li>Your content does not infringe upon any third-party intellectual property rights</li>
             <li>Your content does not contain obscene, defamatory, or unlawful material as defined under the Information Technology Act, 2000</li>
             <li>You will not upload malicious files, viruses, or harmful code</li>
+            <li>You understand and accept that <strong>only compressed versions</strong> of your uploaded content will be stored on our servers — original files are not retained</li>
+            <li>You are solely responsible for maintaining backups of all original files before uploading</li>
           </ul>
           <p>
-            <strong>Storage Limits:</strong> Each plan has defined storage limits. Free accounts are limited to 3 projects with up to 500 photos total. Paid plans offer expanded limits as detailed on our pricing page. Content may be automatically compressed for optimal delivery but we preserve originals as per your plan settings.
+            <strong>Compression & Processing:</strong> All content uploaded to PhotoShare is automatically compressed and converted into optimized formats suitable for viewing and selection. Original high-resolution files are discarded after compression. PhotoShare does not guarantee that compressed images will match the quality, resolution, or fidelity of the originals.
           </p>
           <p>
-            <strong>Data Retention:</strong> Content in active accounts is retained indefinitely. For dormant accounts (no login for 12 months), we will send a 30-day notice before archival. Deleted content is permanently removed within 30 days from all systems including backups.
+            <strong>Automatic Deletion Policy:</strong> Once a client has completed their image selection, the selected images will remain on our servers for a maximum period of <strong>2 (two) months</strong> from the date of selection. After this 2-month period, all selected images and associated data will be <strong>automatically and permanently deleted</strong> from our servers without any further notice. It is the user's responsibility to download or retrieve any required content before this automatic deletion occurs.
+          </p>
+          <p>
+            <strong>Unselected Content:</strong> Images that are not selected by the client may be removed from the server at any time after the selection process is complete, at PhotoShare's sole discretion.
+          </p>
+          <p>
+            <strong>No Recovery:</strong> Once content is deleted — whether through automatic deletion, manual deletion, or account termination — it <strong>cannot be recovered</strong>. PhotoShare shall bear no liability whatsoever for any data loss resulting from automatic or manual deletion of content from the Platform.
           </p>
         </LegalSection>
 
-        <LegalSection id="prohibited" title="Prohibited Activities" icon="mdi-cancel" number="7">
+        <LegalSection id="data-handling" title="Data Handling & Disclaimer" icon="mdi-database-alert-outline" number="7">
+          <p>
+            By using PhotoShare, you expressly acknowledge and agree to the following regarding how the Platform handles your data:
+          </p>
+          <ul>
+            <li><strong>No Original Data Storage:</strong> PhotoShare does not store, retain, or archive original files in any form. All uploaded content is compressed and processed into a lower-resolution format optimized for viewing and selection. The original files are permanently discarded upon processing.</li>
+            <li><strong>Compressed Data Only:</strong> The Platform stores only compressed and processed versions of your uploaded content. These compressed files may differ significantly from the originals in terms of quality, resolution, colour accuracy, and file size.</li>
+            <li><strong>No Liability for Original Data Loss:</strong> PhotoShare shall not be responsible, liable, or accountable in any manner for the loss, damage, corruption, or unavailability of your original data. Users must ensure they have independent backups of all original files before uploading.</li>
+            <li><strong>Automatic Deletion After Selection:</strong> Once a client completes the image selection process, the selected images will be retained on the server for a period of <strong>2 (two) months only</strong>. After this period, all data — including selected images, galleries, and associated metadata — will be <strong>automatically and permanently deleted</strong> without prior notice.</li>
+            <li><strong>No Recovery After Deletion:</strong> PhotoShare does not maintain any backups, archives, or copies of deleted content. Once data is deleted from the Platform — whether automatically or manually — it is permanently and irreversibly gone. No recovery requests will be entertained.</li>
+            <li><strong>User's Sole Responsibility:</strong> It is the sole responsibility of the user (photographer/uploader) to maintain their own backups and to download any required content from the Platform before the automatic deletion period expires.</li>
+          </ul>
+          <HighlightBox icon="mdi-alert-outline" variant="warning" title="Critical Notice">
+            By using PhotoShare, you waive any and all claims against PhotoShare relating to data loss, data corruption, or inability to access content that has been deleted from the Platform, whether such deletion occurred automatically, manually, or due to any technical issue. This waiver is absolute and irrevocable for the duration of your use of the Service.
+          </HighlightBox>
+        </LegalSection>
+
+        <LegalSection id="watermark-protection" title="Watermark & Content Protection" icon="mdi-shield-lock-outline" number="8">
+          <p>
+            To safeguard the intellectual property of photographers and content creators, PhotoShare employs the following technical and legal content protection measures:
+          </p>
+          <p><strong>Watermarking:</strong></p>
+          <ul>
+            <li>All images displayed in client-facing galleries are <strong>automatically watermarked</strong> by the Platform to deter unauthorized use, reproduction, or distribution</li>
+            <li>Watermarks are applied as a visible overlay and are an integral part of the gallery viewing experience. They are not removable by the client</li>
+            <li>The photographer/uploader retains full control over watermark settings where configurable. PhotoShare reserves the right to apply a default watermark if none is configured</li>
+          </ul>
+          <p><strong>Anti-Download & Anti-Copy Measures:</strong></p>
+          <ul>
+            <li>PhotoShare implements technical measures to <strong>prevent or discourage downloading, screenshotting, and copying</strong> of gallery images by clients, including but not limited to: right-click disabling, drag-and-drop prevention, and download-blocking scripts</li>
+            <li>Images served in galleries are delivered in a <strong>reduced-resolution, compressed, watermarked format</strong> — they are not suitable for commercial printing or reproduction</li>
+            <li>These measures are provided as a <strong>reasonable deterrent only</strong>. PhotoShare does not guarantee that all forms of unauthorized capture or reproduction can be technically prevented</li>
+          </ul>
+          <HighlightBox icon="mdi-gavel" variant="warning" title="Legal Protection">
+            Any attempt by a client or third party to circumvent watermarks, download-protection measures, or other content-protection features constitutes a <strong>violation of these Terms</strong> and may constitute an offence under the Information Technology Act, 2000 (Sections 43 and 66) and the Indian Copyright Act, 1957. PhotoShare reserves the right to pursue legal remedies, including injunctive relief and damages, against any person who circumvents these protections.
+          </HighlightBox>
+          <p>
+            <strong>Limitation:</strong> While PhotoShare employs industry-standard content protection, no digital protection system is infallible. PhotoShare shall not be held liable for any unauthorized reproduction, distribution, or misuse of content that occurs despite the technical measures in place. The photographer/uploader acknowledges this inherent limitation and agrees that PhotoShare's liability in such cases is limited to the technical measures it has implemented.
+          </p>
+        </LegalSection>
+
+        <LegalSection id="prohibited" title="Prohibited Activities" icon="mdi-cancel" number="9">
           <p>You agree not to engage in any of the following activities:</p>
           <ul>
             <li>Violating any applicable laws, including but not limited to the IT Act, 2000, Copyright Act, 1957, or any other Indian legislation</li>
@@ -190,16 +245,19 @@
             <li>Attempting to gain unauthorized access to other accounts, systems, or networks</li>
             <li>Using the Service to distribute spam, malware, or engage in phishing</li>
             <li>Scraping, data mining, or using automated tools to extract content from the platform</li>
-            <li>Circumventing or attempting to circumvent any security features or usage limits</li>
+            <li>Circumventing or attempting to circumvent any security features, watermarks, download-protection mechanisms, or usage limits</li>
+            <li>Removing, altering, or obscuring any watermarks, copyright notices, or proprietary markings applied to images on the Platform</li>
+            <li>Downloading, capturing (via screenshots or screen recording), or reproducing watermarked gallery images without the explicit written consent of the content owner</li>
             <li>Reselling, renting, or sublicensing the Service without written authorization</li>
+            <li>Using any downloaded or captured images for commercial, editorial, or any other purpose without authorization from the photographer/content owner</li>
             <li>Interfering with or disrupting the integrity or performance of the Service</li>
           </ul>
           <p>
-            Violation of these prohibitions may result in immediate suspension or termination of your account, as determined by PhotoShare at its sole discretion.
+            Violation of these prohibitions may result in immediate suspension or termination of your account, as determined by PhotoShare at its sole discretion. PhotoShare further reserves the right to report violations to law enforcement and pursue civil or criminal remedies under applicable Indian law.
           </p>
         </LegalSection>
 
-        <LegalSection id="termination" title="Termination" icon="mdi-account-off-outline" number="8">
+        <LegalSection id="termination" title="Termination" icon="mdi-account-off-outline" number="10">
           <p>
             <strong>By You:</strong> You may terminate your account at any time through your account settings or by contacting our support team at <a href="mailto:support@photoshare.in">support@photoshare.in</a>. Upon termination, your data will be deleted in accordance with our data retention policy.
           </p>
@@ -217,7 +275,7 @@
           </p>
         </LegalSection>
 
-        <LegalSection id="liability" title="Limitation of Liability" icon="mdi-scale-balance" number="9">
+        <LegalSection id="liability" title="Limitation of Liability" icon="mdi-scale-balance" number="11">
           <p>
             To the maximum extent permitted by applicable Indian law, including the Consumer Protection Act, 2019, and the Information Technology Act, 2000:
           </p>
@@ -225,13 +283,76 @@
             <li>PhotoShare shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Service</li>
             <li>Our total aggregate liability shall not exceed the amount paid by you to PhotoShare in the 12 months preceding the event giving rise to the claim</li>
             <li>We are not liable for any loss of data resulting from factors beyond our reasonable control, including but not limited to force majeure events, internet disruptions, or third-party service failures</li>
+            <li><strong>PhotoShare is not responsible for the loss, corruption, or unavailability of any original data, files, or photographs</strong> uploaded to the Platform, as the Platform does not store original files</li>
+            <li>PhotoShare shall not be liable for any damages, claims, or losses arising from the <strong>automatic deletion of content</strong> after the 2-month retention period or at any other time</li>
+            <li>PhotoShare shall not be liable for any degradation in image quality resulting from the compression and processing of uploaded content</li>
+            <li>Users acknowledge that the Platform is a <strong>sharing and selection tool only</strong> and not a data storage, backup, or archival service, and PhotoShare bears no responsibility for data preservation</li>
           </ul>
-          <HighlightBox icon="mdi-shield-outline" title="We take data safety seriously">
-            While no system is 100% secure, we employ industry-standard encryption, regular backups, and security audits to protect your content and data.
+          <HighlightBox icon="mdi-shield-outline" title="Disclaimer of Warranty">
+            The Service is provided on an "as-is" and "as-available" basis without warranties of any kind, whether express or implied. PhotoShare expressly disclaims all warranties including, but not limited to, warranties of merchantability, fitness for a particular purpose, data accuracy, and non-infringement. You use the Service entirely at your own risk.
+          </HighlightBox>
+          <p>
+            <strong>Indemnification:</strong> You agree to indemnify, defend, and hold harmless PhotoShare, its directors, officers, employees, and agents from and against any and all claims, liabilities, damages, losses, and expenses (including reasonable legal fees) arising out of or in connection with: (a) your use of the Service; (b) your violation of these Terms; (c) your violation of any third-party rights, including intellectual property rights; or (d) any claim that your content caused damage to a third party.
+          </p>
+        </LegalSection>
+
+        <LegalSection id="pricing-billing" title="Pricing, Billing & Refunds" icon="mdi-credit-card-outline" number="12">
+          <p>
+            PhotoShare offers free and paid subscription plans. By subscribing to a paid plan, you agree to the following:
+          </p>
+          <ul>
+            <li><strong>Pricing Transparency:</strong> All prices displayed on the Platform are in Indian Rupees (INR) and are inclusive of applicable taxes unless stated otherwise. Prices are subject to change with 30 days' prior notice</li>
+            <li><strong>Billing Cycle:</strong> Subscriptions are billed on a recurring monthly basis. You authorize PhotoShare to charge your chosen payment method at the start of each billing cycle</li>
+            <li><strong>No Guarantee of Results:</strong> Subscription plans provide access to Platform features and resources. PhotoShare does not guarantee any specific business outcomes, client satisfaction, or revenue generation as a result of using the Service</li>
+            <li><strong>Fair Usage:</strong> All plans are subject to fair usage policies. "Unlimited" features (where applicable) are subject to reasonable use limits designed to prevent abuse and ensure service quality for all users</li>
+            <li><strong>Free Plan Limitations:</strong> The free plan is provided for evaluation purposes and may have restricted features, storage limits, and usage caps. PhotoShare reserves the right to modify or discontinue the free plan at any time</li>
+            <li><strong>Refund Policy:</strong> Subscription fees are generally non-refundable. Pro-rata refunds may be issued at PhotoShare's sole discretion in cases of account termination by PhotoShare without cause. No refunds will be issued for partial-month usage, downgrades, or voluntary cancellation</li>
+            <li><strong>Price Changes:</strong> PhotoShare may revise pricing at any time. Existing subscribers will receive at least 30 days' notice before a price increase takes effect. Continued use after the effective date constitutes acceptance of the new pricing</li>
+          </ul>
+          <HighlightBox icon="mdi-information-outline" title="No Hidden Fees">
+            What you see on our pricing page is what you pay. There are no setup fees, hidden charges, or surprise add-ons. All applicable taxes are clearly stated at checkout.
           </HighlightBox>
         </LegalSection>
 
-        <LegalSection id="changes" title="Changes to Terms" icon="mdi-file-edit-outline" number="10">
+        <LegalSection id="compliance" title="Regulatory Compliance" icon="mdi-certificate-outline" number="13">
+          <p>
+            PhotoShare is committed to operating in full compliance with applicable Indian laws and regulations. The following outlines our compliance posture:
+          </p>
+          <p><strong>Information Technology Compliance:</strong></p>
+          <ul>
+            <li>Compliant with the <strong>Information Technology Act, 2000</strong> and all applicable rules and amendments</li>
+            <li>Adheres to the <strong>Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011</strong> (SPDI Rules)</li>
+            <li>Compliance with the <strong>Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021</strong> as applicable to intermediary platforms</li>
+            <li>Preparing for full compliance with the <strong>Digital Personal Data Protection Act (DPDPA), 2023</strong> as rules are notified by the Government of India</li>
+          </ul>
+          <p><strong>Intellectual Property Compliance:</strong></p>
+          <ul>
+            <li>Respects intellectual property rights under the <strong>Copyright Act, 1957</strong> and the <strong>Trade Marks Act, 1999</strong></li>
+            <li>Implements watermarking and anti-download measures as technical protection under Section 65A/65B of the Copyright Act</li>
+            <li>Maintains a process for addressing copyright infringement complaints and takedown requests</li>
+          </ul>
+          <p><strong>Business & Corporate Compliance:</strong></p>
+          <ul>
+            <li>Incorporated and operating under the <strong>Companies Act, 2013</strong></li>
+            <li>GST registered and tax compliant under applicable Indian tax laws</li>
+            <li>Payment processing through <strong>PCI-DSS compliant</strong> payment gateways</li>
+            <li>Maintains a designated Grievance Officer as required under the IT Act and Intermediary Guidelines</li>
+          </ul>
+          <p><strong>Data Security Standards:</strong></p>
+          <ul>
+            <li>AES-256 encryption for data at rest</li>
+            <li>TLS 1.2+ encryption for data in transit</li>
+            <li>Role-based access controls and principle of least privilege</li>
+            <li>Periodic security audits and vulnerability assessments</li>
+            <li>72-hour data breach notification protocol</li>
+            <li>Hosted on SOC 2 compliant cloud infrastructure</li>
+          </ul>
+          <HighlightBox icon="mdi-shield-check-outline" variant="success" title="Investor & Enterprise Ready">
+            PhotoShare maintains regulatory compliance documentation, audit trails, and security certifications suitable for investor due diligence, enterprise procurement, and partnership evaluations. For compliance inquiries, contact <strong>compliance@photoshare.in</strong>.
+          </HighlightBox>
+        </LegalSection>
+
+        <LegalSection id="changes" title="Changes to Terms" icon="mdi-file-edit-outline" number="14">
           <p>
             We reserve the right to modify these Terms at any time. When we make material changes:
           </p>
@@ -246,16 +367,16 @@
           </p>
         </LegalSection>
 
-        <LegalSection id="governing-law" title="Governing Law & Disputes" icon="mdi-gavel" number="11">
+        <LegalSection id="governing-law" title="Governing Law & Disputes" icon="mdi-gavel" number="15">
           <p>
-            These Terms shall be governed by and construed in accordance with the <strong>laws of India</strong>. Any disputes arising from or relating to these Terms shall be subject to the exclusive jurisdiction of the courts located in <strong>Bangalore, Karnataka, India</strong>.
+            These Terms shall be governed by and construed in accordance with the <strong>laws of India</strong>. Any disputes arising from or relating to these Terms shall be subject to the exclusive jurisdiction of the courts located in <strong>Hyderabad, Telangana, India</strong>.
           </p>
           <p>
-            Before initiating any legal proceedings, both parties agree to first attempt resolution through good-faith negotiation for a period of 30 days. If the dispute remains unresolved, either party may refer the matter to arbitration under the Arbitration and Conciliation Act, 1996, with the seat of arbitration in Bangalore.
+            Before initiating any legal proceedings, both parties agree to first attempt resolution through good-faith negotiation for a period of 30 days. If the dispute remains unresolved, either party may refer the matter to arbitration under the Arbitration and Conciliation Act, 1996, with the seat of arbitration in Hyderabad.
           </p>
         </LegalSection>
 
-        <LegalSection id="contact" title="Contact Information" icon="mdi-email-outline" number="12">
+        <LegalSection id="contact" title="Contact Information" icon="mdi-email-outline" number="16">
           <p>If you have any questions about these Terms of Service, please contact us:</p>
           <div class="contact-card">
             <div class="contact-row">
@@ -268,7 +389,7 @@
             </div>
             <div class="contact-row">
               <v-icon size="18" color="#7c3aed">mdi-map-marker-outline</v-icon>
-              <span><strong>Address:</strong> PhotoShare Technologies Pvt. Ltd., Bangalore, Karnataka, India</span>
+              <span><strong>Address:</strong> PhotoShare Technologies Pvt. Ltd., Hyderabad, Telangana, India</span>
             </div>
             <div class="contact-row">
               <v-icon size="18" color="#7c3aed">mdi-headset</v-icon>
@@ -325,9 +446,13 @@ const sections = [
   { id: 'use-of-service', title: 'Use of Service', icon: 'mdi-laptop-account' },
   { id: 'content-ownership', title: 'Content Ownership', icon: 'mdi-copyright' },
   { id: 'upload-storage', title: 'Upload & Storage Rules', icon: 'mdi-cloud-upload-outline' },
+  { id: 'data-handling', title: 'Data Handling & Disclaimer', icon: 'mdi-database-alert-outline' },
+  { id: 'watermark-protection', title: 'Watermark & Content Protection', icon: 'mdi-shield-lock-outline' },
   { id: 'prohibited', title: 'Prohibited Activities', icon: 'mdi-cancel' },
   { id: 'termination', title: 'Termination', icon: 'mdi-account-off-outline' },
   { id: 'liability', title: 'Limitation of Liability', icon: 'mdi-scale-balance' },
+  { id: 'pricing-billing', title: 'Pricing, Billing & Refunds', icon: 'mdi-credit-card-outline' },
+  { id: 'compliance', title: 'Regulatory Compliance', icon: 'mdi-certificate-outline' },
   { id: 'changes', title: 'Changes to Terms', icon: 'mdi-file-edit-outline' },
   { id: 'governing-law', title: 'Governing Law & Disputes', icon: 'mdi-gavel' },
   { id: 'contact', title: 'Contact Information', icon: 'mdi-email-outline' },
