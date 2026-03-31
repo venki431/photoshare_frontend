@@ -52,31 +52,64 @@ export const photoService = {
    * @param {{ originalName?, originalSize?, compressedSize? }} meta
    * @returns Promise<{ success, data: Photo, message }>
    */
-  async uploadPhoto(projectId, file, meta = {}) {
+  async uploadPhoto(projectId, file, meta = {}, { signal, onProgress } = {}) {
     if (USE_MOCK) return photoMock.uploadPhoto(projectId, file, meta)
 
-    // Real upload uses FormData, not JSON
     return safeCall(async () => {
       const form = new FormData()
       form.append('photo', file)
 
       const token = localStorage.getItem('ps_auth_token')
+      const url = `${import.meta.env.VITE_API_BASE_URL}/projects/${projectId}/photos`
+
+      // Use XMLHttpRequest for upload progress tracking
+      if (onProgress) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest()
+          xhr.open('POST', url)
+
+          if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+          if (meta.originalName) xhr.setRequestHeader('X-Original-Filename', meta.originalName)
+          if (meta.originalSize) xhr.setRequestHeader('X-Original-Size', String(meta.originalSize))
+
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
+          }
+
+          xhr.onload = () => {
+            try {
+              const json = JSON.parse(xhr.responseText)
+              if (xhr.status >= 200 && xhr.status < 300) resolve(json)
+              else reject({ message: json?.message || `HTTP ${xhr.status}` })
+            } catch { reject({ message: `HTTP ${xhr.status}` }) }
+          }
+
+          xhr.onerror = () => reject({ message: 'Network error' })
+          xhr.onabort = () => reject({ message: 'Upload cancelled', cancelled: true })
+
+          // Wire up AbortController
+          if (signal) {
+            if (signal.aborted) { xhr.abort(); return }
+            signal.addEventListener('abort', () => xhr.abort(), { once: true })
+          }
+
+          xhr.send(form)
+        })
+      }
+
+      // Fallback: simple fetch with signal (no progress)
       const headers = {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       }
-
-      // Send original file metadata as headers for backend to store
       if (meta.originalName) headers['X-Original-Filename'] = meta.originalName
       if (meta.originalSize) headers['X-Original-Size'] = String(meta.originalSize)
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/projects/${projectId}/photos`,
-        {
-          method: 'POST',
-          headers,
-          body: form,
-        }
-      )
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: form,
+        signal,
+      })
       const json = await response.json()
       if (!response.ok) throw { message: json?.message || `HTTP ${response.status}` }
       return json

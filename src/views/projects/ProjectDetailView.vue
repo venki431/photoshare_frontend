@@ -24,18 +24,21 @@
     </div>
 
     <!-- Upload Zone (hide during compression only) -->
-    <UploadZone v-if="canAcceptFiles" @files="handleFiles" />
+    <UploadZone v-if="canAcceptFiles  && projectStore?.currentProject?.status !== 'completed'" @files="handleFiles" />
 
     <!-- Compression / Upload Progress -->
     <UploadProgress
       :manager="uploadManager"
       @reset="handleReset"
+      @cancel="uploadManager.cancel()"
+      @retry="uploadManager.retryFailed()"
     />
 
     <!-- Gallery: show uploaded + compressed previews -->
     <ImageGrid
       :images="galleryImages"
       :upload-phase="currentPhase"
+      :projectCompleted="projectStore.currentProject?.status === 'completed' ? false : true"
       @preview="openPreview"
       @delete="deleteSingle"
       @bulk-delete="deleteMultiple"
@@ -81,6 +84,7 @@ import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { useUploadManager } from '@/composables/useUploadManager'
 import { usePhotoStore } from '@/stores/photo.store'
 import { useProjectStore } from '@/stores/projects'
+import { photoService } from '@/api/services/photo.service'
 
 const route = useRoute()
 const projectId = route?.params?.id ?? 'demo'
@@ -94,12 +98,9 @@ const fileHashSet = new Set()
 
 onMounted(async () => {
   try {
-    const [project] = await Promise.all([
-      projectStore.fetchProject(projectId).catch(() => null),
-      photoStore.fetchPhotos(projectId)
-    ])
+    const project = await projectStore.fetchProject(projectId).catch(() => null)
     if (project?.shareId) projectShareId.value = project.shareId
-    const existing = photoStore.getPhotos(projectId)
+    const existing = project?.images || []
     uploadedImages.value = existing.map(photo => normalizePhoto(photo))
     uploadedImages.value.forEach(img => fileHashSet.add(img.fileKey))
   } catch { /* First load may fail */ }
@@ -112,17 +113,21 @@ function normalizePhoto(photo) {
     thumbUrl: photo.thumbUrl || photo.thumbnailUrl || photo.url,
     filename: photo.originalFileName || photo.originalName || photo.filename || 'Photo',
     fileKey: photo.fileKey || `server_${photo.id}`,
-    serverId: photo.id
+    serverId: photo.id,
+    selectedByClient: photo.selected || photo.selectedByClient || false
   }
 }
 
-const uploadManager = useUploadManager(async (blob, filename, fileMeta) => {
+const uploadManager = useUploadManager(async (blob, filename, fileMeta, { signal, onProgress } = {}) => {
   const file = new File([blob], filename, { type: blob.type || 'image/jpeg' })
-  const serverPhoto = await photoStore.uploadPhoto(projectId, file)
-  const normalized = normalizePhoto(serverPhoto)
+  const res = await photoService.uploadPhoto(projectId, file, {
+    originalName: filename,
+    originalSize: blob.size,
+  }, { signal, onProgress })
+  const normalized = normalizePhoto(res.data)
   normalized.fileKey = fileMeta.fileKey
   uploadedImages.value = [...uploadedImages.value, normalized]
-}, { uploadConcurrency: 3, maxRetries: 2 })
+}, { uploadConcurrency: 5, maxRetries: 2 })
 
 const currentPhase = computed(() => toValue(uploadManager.phase))
 

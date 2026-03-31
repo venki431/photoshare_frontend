@@ -9,7 +9,7 @@
         </span>
       </div>
 
-      <div class="toolbar-right">
+      <div class="toolbar-right" v-if="projectCompleted">
         <!-- Select mode toggle -->
         <button
           class="toolbar-btn"
@@ -62,6 +62,7 @@
           Uploading...
         </v-btn>
 
+
         <v-btn
           v-else-if="uploadPhase === 'done' || (uploadPhase === 'idle' && images.length > 0)"
           color="primary"
@@ -83,7 +84,11 @@
         v-for="img in images"
         :key="img.id"
         class="image-card"
-        :class="{ 'image-card--selected': isSelected(img.id) }"
+        :class="{
+          'image-card--selected': isSelected(img.id),
+          'image-card--client-selected': hasClientSelections && img.selectedByClient,
+          'image-card--client-unselected': hasClientSelections && !img.selectedByClient
+        }"
         @click="handleCardClick(img)"
       >
         <!-- Thumbnail -->
@@ -111,6 +116,11 @@
           </div>
         </div>
 
+        <!-- Client selection badge -->
+        <div v-if="hasClientSelections && img.selectedByClient" class="image-card__client-badge">
+          <v-icon size="12" color="white">mdi-heart</v-icon>
+        </div>
+
         <!-- Selection glow -->
         <div v-if="isSelected(img.id)" class="image-card__glow" />
       </div>
@@ -129,18 +139,21 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 
 const props = defineProps({
   images: { type: Array, default: () => [] },
-  uploadPhase: { type: String, default: 'idle' }
+  uploadPhase: { type: String, default: 'idle' },
+  projectCompleted: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['preview', 'delete', 'bulk-delete', 'start-upload', 'share'])
 
 const selectMode = ref(false)
 const selectedIds = ref(new Set())
+
+const hasClientSelections = computed(() => props.images.some(img => img.selectedByClient))
 
 function isSelected(id) { return selectedIds.value.has(id) }
 
@@ -388,6 +401,40 @@ watch(() => props.images, (imgs) => {
   background: rgba(79, 70, 229, 0.08);
   pointer-events: none;
   z-index: 1;
+}
+
+/* ── Client selection states ──────────────────────────────────────────── */
+
+.image-card--client-unselected {
+  opacity: 0.4;
+  filter: grayscale(100%);
+  transition: opacity var(--ps-duration-fast), filter var(--ps-duration-fast);
+}
+
+.image-card--client-unselected:hover {
+  opacity: 0.7;
+  filter: grayscale(50%);
+}
+
+.image-card--client-selected {
+  outline: 3px solid #EC4899;
+  outline-offset: -3px;
+  border-radius: var(--ps-radius-lg);
+}
+
+.image-card__client-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #EC4899;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(236, 72, 153, 0.4);
+  z-index: 3;
 }
 
 @media (max-width: 600px) {

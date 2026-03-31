@@ -11,7 +11,7 @@
  * - ImageBitmap.close() called to free GPU memory
  */
 self.onmessage = async (e) => {
-  const { file, id, maxDimension = 2048, quality = 0.7 } = e.data
+  const { file, id, maxDimension = 1048, quality = 0.7 } = e.data
 
   let bitmap = null
   try {

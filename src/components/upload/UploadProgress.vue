@@ -30,11 +30,20 @@
         <div v-if="failedCount > 0" class="progress-error">
           <v-icon size="14" color="error">mdi-alert-circle</v-icon>
           {{ failedCount }} file{{ failedCount > 1 ? 's' : '' }} failed
+          <button class="retry-btn" @click="emit('retry')">
+            <v-icon size="13">mdi-refresh</v-icon>
+            Retry
+          </button>
         </div>
       </div>
 
-      <!-- Cancel button -->
-      <button v-if="phase === 'compressing'" class="progress-cancel" @click="emit('reset')">
+      <!-- Cancel button (available during compression AND upload) -->
+      <button
+        v-if="phase === 'compressing' || phase === 'uploading'"
+        class="progress-cancel"
+        @click="phase === 'uploading' ? emit('cancel') : emit('reset')"
+        :title="phase === 'uploading' ? 'Cancel uploads' : 'Cancel compression'"
+      >
         <v-icon size="18">mdi-close</v-icon>
       </button>
     </div>
@@ -48,7 +57,7 @@ const props = defineProps({
   manager: { type: Object, required: true }
 })
 
-const emit = defineEmits(['reset'])
+const emit = defineEmits(['reset', 'cancel', 'retry'])
 
 const phase = computed(() => toValue(props.manager.phase))
 const totalFiles = computed(() => toValue(props.manager.totalFiles))
@@ -198,6 +207,28 @@ const title = computed(() => {
   font-size: 12px;
   color: #EF4444;
   font-weight: 500;
+}
+
+/* Retry button */
+.retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ps-primary);
+  background: rgba(79, 70, 229, 0.08);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  border-radius: var(--ps-radius-sm);
+  cursor: pointer;
+  transition: all var(--ps-duration-fast);
+}
+
+.retry-btn:hover {
+  background: rgba(79, 70, 229, 0.15);
+  border-color: rgba(79, 70, 229, 0.4);
 }
 
 /* Cancel */

@@ -7,11 +7,18 @@ import { useWorkerPool } from './useWorkerPool'
  * Supports adding files in multiple batches before uploading.
  * Each call to processFiles() APPENDS to existing previews (does not wipe).
  *
- * @param {Function} uploadFn - async (blob, filename, fileMeta) => void
+ * Optimizations over original:
+ * - AbortController per file (cancel individual / all)
+ * - Per-file progress tracking via XHR
+ * - Manual retry for failed files
+ * - Configurable concurrency (default 5)
+ * - Batch upload via cursor + Promise.all workers
+ *
+ * @param {Function} uploadFn - async (blob, filename, fileMeta, { signal, onProgress }) => void
  * @param {Object} options
  */
 export function useUploadManager(uploadFn, options = {}) {
-  const { uploadConcurrency = 3, maxRetries = 2 } = options
+  const { uploadConcurrency = 5, maxRetries = 2 } = options
 
   const workerPool = useWorkerPool()
 
@@ -32,12 +39,20 @@ export function useUploadManager(uploadFn, options = {}) {
   )
 
   const uploadProgress = computed(() => {
-    const readyCount = files.value.filter(f => f.status === 'ready' || f.status === 'uploading' || f.status === 'done').length
+    const readyCount = files.value.filter(f =>
+      f.status === 'ready' || f.status === 'uploading' || f.status === 'done'
+    ).length
     return readyCount === 0 ? 0 : Math.round((uploadedCount.value / readyCount) * 100)
   })
 
+  // Per-file progress: Map<id, 0-100>
+  const fileProgress = ref({})
+
   let cancelled = false
   const previewUrls = new Set()
+
+  // AbortControllers for in-flight uploads: Map<id, AbortController>
+  const abortControllers = new Map()
 
   // ── Compression (ACCUMULATES across batches) ───────
   async function processFiles(fileList) {
@@ -118,6 +133,56 @@ export function useUploadManager(uploadFn, options = {}) {
     files.value = [...files.value]
   }
 
+  // ── Upload single entry (used by both startUpload and retryFailed) ─────
+  async function uploadEntry(entry) {
+    entry.status = 'uploading'
+    fileProgress.value = { ...fileProgress.value, [entry.id]: 0 }
+
+    const controller = new AbortController()
+    abortControllers.set(entry.id, controller)
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      if (cancelled || controller.signal.aborted) {
+        entry.status = 'cancelled'
+        break
+      }
+
+      try {
+        await uploadFn(entry.compressed, entry.name, { fileKey: entry.fileKey }, {
+          signal: controller.signal,
+          onProgress: (pct) => {
+            fileProgress.value = { ...fileProgress.value, [entry.id]: pct }
+          }
+        })
+        entry.status = 'done'
+        entry.retries = attempt
+        fileProgress.value = { ...fileProgress.value, [entry.id]: 100 }
+        uploadedCount.value++
+        break
+      } catch (err) {
+        // Don't retry if intentionally cancelled
+        if (err?.cancelled || controller.signal.aborted) {
+          entry.status = 'cancelled'
+          break
+        }
+        if (attempt === maxRetries) {
+          entry.status = 'failed'
+          entry.retries = attempt
+          failedCount.value++
+        } else {
+          // Exponential backoff before retry
+          await new Promise(r => setTimeout(r, 500 * (attempt + 1)))
+        }
+      }
+    }
+
+    abortControllers.delete(entry.id)
+
+    if (uploadedCount.value % 5 === 0) {
+      files.value = [...files.value]
+    }
+  }
+
   // ── Upload with concurrency control ────────────────
   async function startUpload() {
     if (phase.value !== 'ready') return
@@ -125,9 +190,9 @@ export function useUploadManager(uploadFn, options = {}) {
     cancelled = false
     phase.value = 'uploading'
     uploadedCount.value = 0
+    failedCount.value = 0
 
     const readyEntries = files.value.filter(f => f.status === 'ready')
-
     let cursor = 0
 
     async function uploadNext() {
@@ -135,29 +200,7 @@ export function useUploadManager(uploadFn, options = {}) {
         if (cancelled) return
         const idx = cursor++
         const entry = readyEntries[idx]
-
-        entry.status = 'uploading'
-
-        for (let attempt = 0; attempt <= maxRetries; attempt++) {
-          try {
-            await uploadFn(entry.compressed, entry.name, { fileKey: entry.fileKey })
-            entry.status = 'done'
-            uploadedCount.value++
-            break
-          } catch {
-            if (attempt === maxRetries) {
-              entry.status = 'failed'
-              failedCount.value++
-            }
-            if (attempt < maxRetries) {
-              await new Promise(r => setTimeout(r, 500 * (attempt + 1)))
-            }
-          }
-        }
-
-        if (uploadedCount.value % 5 === 0 || cursor >= readyEntries.length) {
-          files.value = [...files.value]
-        }
+        await uploadEntry(entry)
       }
     }
 
@@ -177,6 +220,49 @@ export function useUploadManager(uploadFn, options = {}) {
     previewImages.value = []
 
     phase.value = 'done'
+    files.value = [...files.value]
+  }
+
+  // ── Retry all failed uploads ──────────────────────
+  async function retryFailed() {
+    const failedEntries = files.value.filter(f => f.status === 'failed')
+    if (!failedEntries.length) return
+
+    cancelled = false
+    phase.value = 'uploading'
+    failedCount.value = 0
+
+    let cursor = 0
+
+    async function retryNext() {
+      while (cursor < failedEntries.length) {
+        if (cancelled) return
+        const idx = cursor++
+        const entry = failedEntries[idx]
+        entry.retries = 0
+        await uploadEntry(entry)
+      }
+    }
+
+    const workers = Array.from(
+      { length: Math.min(uploadConcurrency, failedEntries.length) },
+      () => retryNext()
+    )
+    await Promise.all(workers)
+
+    if (cancelled) return
+
+    // If all now done, clean up previews
+    const stillFailed = files.value.some(f => f.status === 'failed')
+    if (!stillFailed) {
+      for (const url of previewUrls) {
+        URL.revokeObjectURL(url)
+      }
+      previewUrls.clear()
+      previewImages.value = []
+      phase.value = 'done'
+    }
+
     files.value = [...files.value]
   }
 
@@ -210,20 +296,32 @@ export function useUploadManager(uploadFn, options = {}) {
     totalFiles.value = files.value.length
   }
 
-  // ── Control ────────────────────────────────────────
+  // ── Cancel individual upload ──────────────────────
+  function cancelFile(id) {
+    const controller = abortControllers.get(id)
+    if (controller) controller.abort()
+  }
+
+  // ── Cancel all uploads ────────────────────────────
   function cancel() {
     cancelled = true
+    // Abort all in-flight uploads
+    for (const [, controller] of abortControllers) {
+      controller.abort()
+    }
+    abortControllers.clear()
     phase.value = 'idle'
   }
 
   function reset() {
-    cancelled = true
+    cancel()
     phase.value = 'idle'
     files.value = []
     totalFiles.value = 0
     compressedCount.value = 0
     uploadedCount.value = 0
     failedCount.value = 0
+    fileProgress.value = {}
     nextId = 0
     for (const url of previewUrls) {
       URL.revokeObjectURL(url)
@@ -240,12 +338,15 @@ export function useUploadManager(uploadFn, options = {}) {
     compressedCount: readonly(compressedCount),
     uploadedCount: readonly(uploadedCount),
     failedCount: readonly(failedCount),
+    fileProgress: readonly(fileProgress),
     compressionProgress,
     uploadProgress,
     processFiles,
     startUpload,
+    retryFailed,
     removePreview,
     removeMultiplePreviews,
+    cancelFile,
     cancel,
     reset
   }

@@ -13,39 +13,39 @@ export const ENDPOINTS = {
   // ── Auth ────────────────────────────────────────────────────────────────────
   AUTH: {
     CHECK_EMAIL: '/auth/check-email',
-    SEND_OTP:    '/auth/send-otp',
-    VERIFY_OTP:  '/auth/verify-otp',
-    SIGNUP:      '/auth/signup',
-    LOGOUT:      '/auth/logout',
-    ME:          '/auth/me',
-    UPDATE_ME:   '/auth/me',
+    SEND_OTP: '/auth/send-otp',
+    VERIFY_OTP: '/auth/verify-otp',
+    SIGNUP: '/auth/signup',
+    LOGOUT: '/auth/logout',
+    ME: '/auth/me',
+    UPDATE_ME: '/auth/me',
   },
 
   // ── Projects ────────────────────────────────────────────────────────────────
   PROJECTS: {
-    LIST:          '/projects',
-    DETAIL:        (id)      => `/projects/${id}`,
-    CREATE:        '/projects',
-    UPDATE:        (id)      => `/projects/${id}`,
-    DELETE:        (id)      => `/projects/${id}`,
-    BY_SHARE_ID:   (shareId) => `/projects/share/${shareId}`,
+    LIST: '/projects',
+    DETAIL: (id) => `/projects/${id}`,
+    CREATE: '/projects',
+    UPDATE: (id) => `/projects/${id}`,
+    DELETE: (id) => `/projects/${id}`,
+    BY_SHARE_ID: (shareId) => `/projects/share/${shareId}`,
   },
 
   // ── Photos ──────────────────────────────────────────────────────────────────
   PHOTOS: {
     LIST_BY_PROJECT: (projectId) => `/projects/${projectId}/photos`,
-    SELECTED:        (projectId) => `/projects/${projectId}/photos/selected`,
-    DETAIL:          (id)        => `/photos/${id}`,
-    UPLOAD:          (projectId) => `/projects/${projectId}/photos`,
-    DELETE:          (id)        => `/photos/${id}`,
-    BULK_DELETE:     '/photos/bulk-delete',
+    SELECTED: (projectId) => `/projects/${projectId}/photos/selected`,
+    DETAIL: (id) => `/photos/${id}`,
+    UPLOAD: (projectId) => `/projects/${projectId}/photos`,
+    DELETE: (id) => `/photos/${id}`,
+    BULK_DELETE: '/photos/bulk-delete',
   },
 
   // ── Selections ───────────────────────────────────────────────────────────────
   SELECTIONS: {
-    GET_BY_SHARE:   (shareId) => `/selections/${shareId}`,
-    TOGGLE_PHOTO:   (shareId) => `/selections/${shareId}/toggle`,
-    SET_COMMENT:    (shareId) => `/selections/${shareId}/comment`,
-    SUBMIT:         (shareId) => `/selections/${shareId}/submit`,
+    GET_BY_SHARE: (shareId) => `/selections/${shareId}`,
+    TOGGLE_PHOTO: (shareId) => `/selections/${shareId}/toggle`,
+    SET_COMMENT: (shareId) => `/selections/${shareId}/comment`,
+    SUBMIT: (shareId) => `/selections/${shareId}/submit`,
   },
 }

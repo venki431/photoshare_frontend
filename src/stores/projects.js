@@ -58,7 +58,7 @@ export const useProjectStore = defineStore('projects', () => {
         ...projectRes.data,
         images: (photosRes.data || []).map(p => ({
           ...p,
-          selected: false,
+          selected: p.selectedByClient || false,
           comment: '',
         })),
       }
