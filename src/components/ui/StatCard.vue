@@ -1,5 +1,5 @@
 <template>
-  <div class="stat-card" :class="`stat-card--${color}`" @mouseenter="hovered = true" @mouseleave="hovered = false">
+  <div class="stat-card" :class="`stat-card--${color}`">
     <div class="stat-card__bg" />
 
     <div class="stat-card__content">
@@ -30,8 +30,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-
 defineProps({
   title: String,
   value: [String, Number],
@@ -40,8 +38,6 @@ defineProps({
   chip: String,
   chipColor: String
 })
-
-const hovered = ref(false)
 </script>
 
 <style scoped>

@@ -186,7 +186,7 @@ export const useProjectStore = defineStore('projects', () => {
       }
       return res.data
     } catch (err) {
-      console.error('Upload failed:', err?.message)
+      // error propagated to caller
       throw err
     }
   }
@@ -199,7 +199,7 @@ export const useProjectStore = defineStore('projects', () => {
         currentProject.value.imageCount = Math.max(0, (currentProject.value.imageCount || 1) - 1)
       }
     } catch (err) {
-      console.error('Delete failed:', err?.message)
+      // error propagated to caller
       throw err
     }
   }
@@ -213,14 +213,14 @@ export const useProjectStore = defineStore('projects', () => {
         currentProject.value.imageCount = Math.max(0, (currentProject.value.imageCount || ids.length) - ids.length)
       }
     } catch (err) {
-      console.error('Bulk delete failed:', err?.message)
+      // error propagated to caller
       throw err
     }
   }
 
   // ─── Selection Operations (Client Gallery) ──────────────────────────────────
 
-  async function toggleImageSelection(projectIdOrShareId, imageId) {
+  async function toggleImageSelection(_shareId, imageId) {
     const project = currentProject.value
     if (!project) return
 
@@ -238,11 +238,11 @@ export const useProjectStore = defineStore('projects', () => {
       // Rollback
       image.selected = !image.selected
       project.selectedCount = project.images?.filter(img => img.selected)?.length ?? 0
-      console.error('Toggle failed:', err?.message)
+      // error propagated to caller
     }
   }
 
-  async function setImageComment(projectIdOrShareId, imageId, comment) {
+  async function setImageComment(_shareId, imageId, comment) {
     const project = currentProject.value
     if (!project) return
 
@@ -256,7 +256,7 @@ export const useProjectStore = defineStore('projects', () => {
       await selectionService.setComment(project.shareId, imageId, comment)
     } catch (err) {
       image.comment = oldComment
-      console.error('Comment failed:', err?.message)
+      // error propagated to caller
     }
   }
 

@@ -390,8 +390,8 @@ async function handleCreate() {
     const project = await projectStore.createProject(payload);
     resetAndClose();
     router.push(`/projects/${project.id}`);
-  } catch (err) {
-    console.error("Failed to create project:", err);
+  } catch {
+    // handled by store error state
   } finally {
     creating.value = false;
   }

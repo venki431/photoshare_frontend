@@ -82,13 +82,11 @@ import ShareDialog from '@/components/gallery/ShareDialog.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 
 import { useUploadManager } from '@/composables/useUploadManager'
-import { usePhotoStore } from '@/stores/photo.store'
 import { useProjectStore } from '@/stores/projects'
 import { photoService } from '@/api/services/photo.service'
 
 const route = useRoute()
 const projectId = route?.params?.id ?? 'demo'
-const photoStore = usePhotoStore()
 const projectStore = useProjectStore()
 
 const projectShareId = ref('')
@@ -183,7 +181,7 @@ async function deleteSingle(id) {
     uploadedImages.value = uploadedImages.value.filter(i => i.id !== id)
     showSnackbar('Image deleted')
     if (img.serverId) {
-      try { await photoStore.deletePhoto(img.serverId, projectId) }
+      try { await projectStore.deletePhoto(img.serverId, projectId) }
       catch { showSnackbar('Failed to delete from server', 'error') }
     }
     return
@@ -214,7 +212,7 @@ async function deleteMultiple(ids) {
   if (previewIdsToRemove.length) uploadManager.removeMultiplePreviews(previewIdsToRemove)
   showSnackbar(`${ids.length} item${ids.length !== 1 ? 's' : ''} deleted`)
   if (serverIds.length) {
-    try { await photoStore.bulkDeletePhotos(serverIds, projectId) }
+    try { await projectStore.bulkDeletePhotos(serverIds, projectId) }
     catch { showSnackbar('Failed to delete some items from server', 'error') }
   }
 }

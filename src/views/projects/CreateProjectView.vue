@@ -514,12 +514,6 @@ async function handleFiles(files) {
   const batchSize = 1
   const tempStorage = []
 
-  const totalOriginalSize = imageFiles.reduce((sum, f) => sum + f.size, 0)
-  let totalCompressedSize = 0
-
-  console.log(`\n📸 Processing ${imageFiles.length} images`)
-  console.log(`📦 Total original size: ${formatBytes(totalOriginalSize)}`)
-
   for (let i = 0; i < imageFiles.length; i += batchSize) {
     const batch = imageFiles.slice(i, i + batchSize)
 
@@ -532,10 +526,8 @@ async function handleFiles(files) {
             useWebWorker: true,
             initialQuality: 0.8,
           })
-          totalCompressedSize += compressed.size
           return { file: compressed, preview: null, originalSize: file.size, compressedSize: compressed.size }
         } catch {
-          totalCompressedSize += file.size
           return { file, preview: null, originalSize: file.size, compressedSize: file.size }
         }
       })
@@ -559,14 +551,6 @@ async function handleFiles(files) {
   if (tempStorage.length) {
     uploadedFiles.value = [...uploadedFiles.value, ...tempStorage]
   }
-
-  const saved = totalOriginalSize - totalCompressedSize
-  const savedPct = totalOriginalSize > 0 ? ((saved / totalOriginalSize) * 100).toFixed(1) : 0
-
-  console.log(`✅ Compression complete`)
-  console.log(`   Before: ${formatBytes(totalOriginalSize)}`)
-  console.log(`   After:  ${formatBytes(totalCompressedSize)}`)
-  console.log(`   Saved:  ${formatBytes(saved)} (${savedPct}%)`)
 
   uploading.value = false
   generatePreviews()
@@ -672,29 +656,10 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
 // ── Helpers ──
 
-function formatBytes(bytes) {
-  if (bytes === 0) return '0 B'
-  const units = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + units[i]
-}
-
 // ── Create project ──
 
 async function handleCreate() {
   try {
-    const totalOriginal = uploadedFiles.value.reduce((sum, item) => sum + (item.originalSize || 0), 0)
-    const totalCompressed = uploadedFiles.value.reduce((sum, item) => sum + (item.compressedSize || item.file.size), 0)
-    const saved = totalOriginal - totalCompressed
-    const savedPct = totalOriginal > 0 ? ((saved / totalOriginal) * 100).toFixed(1) : 0
-
-    console.log(`\n🚀 Creating project: "${form.name}"`)
-    console.log(`   Total files: ${uploadedFiles.value.length}`)
-    console.log(`   Original total size:   ${formatBytes(totalOriginal)}`)
-    console.log(`   Compressed total size: ${formatBytes(totalCompressed)}`)
-    console.log(`   Total saved:           ${formatBytes(saved)} (${savedPct}%)`)
-    console.log(`   Upload payload size:   ${formatBytes(totalCompressed)}`)
-
     const formData = new FormData()
 
     uploadedFiles.value.forEach((item) => {
@@ -708,8 +673,8 @@ async function handleCreate() {
 
     const project = await projectStore.createProject(formData)
     router.push(`/projects/${project.id}`)
-  } catch (error) {
-    console.error('Create project failed:', error)
+  } catch {
+    // handled by store error state
   }
 }
 </script>
