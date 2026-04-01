@@ -5,17 +5,23 @@
   </span>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { ProjectStatus } from '@/types'
 
-const props = defineProps({
-  status: { type: String, default: 'pending' }
+const props = withDefaults(defineProps<{
+  status?: ProjectStatus | string
+}>(), {
+  status: 'pending',
 })
 
-const label = computed(() => {
-  const map = { pending: 'Pending', in_review: 'In Review', completed: 'Completed' }
-  return map[props.status] || props.status
-})
+const statusLabels: Record<string, string> = {
+  pending: 'Pending',
+  in_review: 'In Review',
+  completed: 'Completed',
+}
+
+const label = computed(() => statusLabels[props.status] ?? props.status)
 </script>
 
 <style scoped>

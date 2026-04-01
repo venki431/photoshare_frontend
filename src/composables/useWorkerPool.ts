@@ -1,32 +1,32 @@
 import { onUnmounted } from 'vue'
+import type { CompressionResult } from '@/types'
 
-/**
- * Web Worker pool with proper free/busy tracking.
- *
- * Key fixes vs original:
- * 1. Each worker gets a PERMANENT onmessage handler at creation (no overwrites)
- * 2. Free workers tracked via a Set — no more `active % length` guessing
- * 3. Each task gets a unique ID mapped to its resolve/reject — no lost promises
- * 4. Workers terminated on unmount — no memory leaks
- * 5. Exposed `terminate()` for manual cleanup
- */
-export function useWorkerPool(size = navigator.hardwareConcurrency || 4) {
-  const workers = []
-  const freeWorkers = new Set()
-  const taskQueue = []
-  const pendingTasks = new Map() // taskId -> { resolve, reject }
+interface PendingTask {
+  resolve: (value: CompressionResult) => void
+  reject: (reason: Error) => void
+}
+
+interface QueuedTask {
+  file: File
+  id: number
+  taskId: number
+}
+
+export function useWorkerPool(size: number = navigator.hardwareConcurrency || 4) {
+  const workers: Worker[] = []
+  const freeWorkers = new Set<number>()
+  const taskQueue: QueuedTask[] = []
+  const pendingTasks = new Map<number, PendingTask>()
   let taskIdCounter = 0
   let terminated = false
 
-  // Create workers with permanent message handlers
   for (let i = 0; i < size; i++) {
     const worker = new Worker(
       new URL('../workers/compression.worker.js', import.meta.url),
       { type: 'module' }
     )
 
-    // Permanent handler — never overwritten
-    worker.onmessage = (e) => {
+    worker.onmessage = (e: MessageEvent<{ id: number; error?: string; blob?: Blob; width?: number; height?: number }>) => {
       const { id, error, ...result } = e.data
       const task = pendingTasks.get(id)
       if (!task) return
@@ -37,15 +37,13 @@ export function useWorkerPool(size = navigator.hardwareConcurrency || 4) {
       if (error) {
         task.reject(new Error(error))
       } else {
-        task.resolve(result)
+        task.resolve(result as CompressionResult)
       }
 
-      // Drain queue with this now-free worker
       drainQueue()
     }
 
-    worker.onerror = (err) => {
-      // If a worker crashes, mark it free and reject the oldest pending task
+    worker.onerror = (err: ErrorEvent) => {
       freeWorkers.add(i)
       err.preventDefault()
     }
@@ -54,10 +52,10 @@ export function useWorkerPool(size = navigator.hardwareConcurrency || 4) {
     workers.push(worker)
   }
 
-  function runTask(file, id) {
+  function runTask(file: File, id: number): Promise<CompressionResult> {
     if (terminated) return Promise.reject(new Error('Worker pool terminated'))
 
-    return new Promise((resolve, reject) => {
+    return new Promise<CompressionResult>((resolve, reject) => {
       const taskId = taskIdCounter++
       pendingTasks.set(taskId, { resolve, reject })
       taskQueue.push({ file, id, taskId })
@@ -65,23 +63,22 @@ export function useWorkerPool(size = navigator.hardwareConcurrency || 4) {
     })
   }
 
-  function drainQueue() {
+  function drainQueue(): void {
     while (taskQueue.length > 0 && freeWorkers.size > 0) {
-      const workerIndex = freeWorkers.values().next().value
+      const workerIndex = freeWorkers.values().next().value as number
       freeWorkers.delete(workerIndex)
 
-      const task = taskQueue.shift()
+      const task = taskQueue.shift()!
       workers[workerIndex].postMessage({
         file: task.file,
-        id: task.taskId // Use internal taskId for tracking
+        id: task.taskId,
       })
     }
   }
 
-  function terminate() {
+  function terminate(): void {
     terminated = true
     workers.forEach(w => w.terminate())
-    // Reject any pending tasks
     for (const [, task] of pendingTasks) {
       task.reject(new Error('Worker pool terminated'))
     }
@@ -89,7 +86,6 @@ export function useWorkerPool(size = navigator.hardwareConcurrency || 4) {
     taskQueue.length = 0
   }
 
-  // Auto-cleanup on component unmount
   onUnmounted(terminate)
 
   return { runTask, terminate }

@@ -181,7 +181,7 @@
                   <input
                     v-for="(digit, idx) in otpDigits"
                     :key="idx"
-                    :ref="el => { if (el) otpInputRefs[idx] = el }"
+                    :ref="(el: any) => { if (el) otpInputRefs[idx] = el as HTMLInputElement }"
                     v-model="otpDigits[idx]"
                     maxlength="1"
                     inputmode="numeric"
@@ -249,23 +249,33 @@
   </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+interface VFormInstance {
+  validate: () => Promise<{ valid: boolean }>
+}
+
 const authStore = useAuthStore()
 const router = useRouter()
 
-const step = ref(1)
-const formRef = ref(null)
-const formValid = ref(false)
-const errorMsg = ref('')
-const submitting = ref(false)
-const signupComplete = ref(false)
-const resendCooldown = ref(0)
+const step = ref<number>(1)
+const formRef = ref<VFormInstance | null>(null)
+const formValid = ref<boolean>(false)
+const errorMsg = ref<string>('')
+const submitting = ref<boolean>(false)
+const signupComplete = ref<boolean>(false)
+const resendCooldown = ref<number>(0)
 
-const form = reactive({
+const form = reactive<{
+  name: string
+  email: string
+  phone_number: string
+  date_of_birth: string
+  address: string
+}>({
   name: '',
   email: '',
   phone_number: '',
@@ -273,12 +283,12 @@ const form = reactive({
   address: '',
 })
 
-const otpDigits = reactive(Array(6).fill(''))
-const otpInputRefs = reactive([])
-const otpCode = computed(() => otpDigits.join(''))
+const otpDigits = reactive<string[]>(Array(6).fill(''))
+const otpInputRefs = reactive<HTMLInputElement[]>([])
+const otpCode = computed<string>(() => otpDigits.join(''))
 
 // Max DOB: must be at least 13 years old
-const maxDob = computed(() => {
+const maxDob = computed<string>(() => {
   const d = new Date()
   d.setFullYear(d.getFullYear() - 13)
   return d.toISOString().split('T')[0]
@@ -286,39 +296,39 @@ const maxDob = computed(() => {
 
 // ─── Validation rules ───────────────────────────────────────────────────────
 
-const nameRules = [
-  v => !!v?.trim() || 'Full name is required',
-  v => v?.trim().length >= 2 || 'Name must be at least 2 characters',
+const nameRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !!v?.trim() || 'Full name is required',
+  (v: string) => (v?.trim().length ?? 0) >= 2 || 'Name must be at least 2 characters',
 ]
 
-const emailRules = [
-  v => !!v?.trim() || 'Email is required',
-  v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Please enter a valid email address',
+const emailRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !!v?.trim() || 'Email is required',
+  (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Please enter a valid email address',
 ]
 
-const phoneRules = [
-  v => !!v?.trim() || 'Phone number is required',
-  v => /^[+]?[\d\s()-]{7,20}$/.test(v) || 'Please enter a valid phone number',
+const phoneRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !!v?.trim() || 'Phone number is required',
+  (v: string) => /^[+]?[\d\s()-]{7,20}$/.test(v) || 'Please enter a valid phone number',
 ]
 
-const dobRules = [
-  v => !!v || 'Date of birth is required',
-  v => {
+const dobRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !!v || 'Date of birth is required',
+  (v: string) => {
     if (!v) return true
-    const age = (new Date() - new Date(v)) / (365.25 * 24 * 60 * 60 * 1000)
+    const age = (Date.now() - new Date(v).getTime()) / (365.25 * 24 * 60 * 60 * 1000)
     return age >= 13 || 'You must be at least 13 years old'
   },
 ]
 
-const addressRules = [
-  v => !!v?.trim() || 'Address is required',
-  v => v?.trim().length >= 5 || 'Address must be at least 5 characters',
+const addressRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !!v?.trim() || 'Address is required',
+  (v: string) => (v?.trim().length ?? 0) >= 5 || 'Address must be at least 5 characters',
 ]
 
 // ─── Handlers ────────────────────────────────────────────────────────────────
 
-async function handleSendOtp() {
-  const { valid } = await formRef.value.validate()
+async function handleSendOtp(): Promise<void> {
+  const { valid } = await formRef.value!.validate()
   if (!valid) return
 
   errorMsg.value = ''
@@ -335,14 +345,14 @@ async function handleSendOtp() {
     startResendCooldown()
     await nextTick()
     otpInputRefs[0]?.focus()
-  } catch (err) {
-    errorMsg.value = err?.message || 'Failed to send verification code'
+  } catch (err: unknown) {
+    errorMsg.value = (err as { message?: string })?.message || 'Failed to send verification code'
   } finally {
     submitting.value = false
   }
 }
 
-async function handleSignup() {
+async function handleSignup(): Promise<void> {
   if (otpCode.value.length < 6) return
   errorMsg.value = ''
   submitting.value = true
@@ -356,14 +366,14 @@ async function handleSignup() {
       otp: otpCode.value,
     })
     router.push('/dashboard')
-  } catch (err) {
-    errorMsg.value = err?.message || 'Signup failed. Please try again.'
+  } catch (err: unknown) {
+    errorMsg.value = (err as { message?: string })?.message || 'Signup failed. Please try again.'
   } finally {
     submitting.value = false
   }
 }
 
-async function handleResendOtp() {
+async function handleResendOtp(): Promise<void> {
   if (resendCooldown.value > 0) return
   errorMsg.value = ''
   try {
@@ -372,12 +382,12 @@ async function handleResendOtp() {
     startResendCooldown()
     await nextTick()
     otpInputRefs[0]?.focus()
-  } catch (err) {
-    errorMsg.value = err?.message || 'Failed to resend code'
+  } catch (err: unknown) {
+    errorMsg.value = (err as { message?: string })?.message || 'Failed to resend code'
   }
 }
 
-function startResendCooldown() {
+function startResendCooldown(): void {
   resendCooldown.value = 60
   const timer = setInterval(() => {
     resendCooldown.value--
@@ -387,7 +397,7 @@ function startResendCooldown() {
 
 // ─── OTP input helpers ───────────────────────────────────────────────────────
 
-function onOtpInput(idx) {
+function onOtpInput(idx: number): void {
   const val = otpDigits[idx]
   if (!/^\d$/.test(val)) {
     otpDigits[idx] = ''
@@ -398,11 +408,11 @@ function onOtpInput(idx) {
   if (otpCode.value.length === 6) handleSignup()
 }
 
-function onOtpBackspace(idx) {
+function onOtpBackspace(idx: number): void {
   if (!otpDigits[idx] && idx > 0) otpInputRefs[idx - 1]?.focus()
 }
 
-function onOtpPaste(event) {
+function onOtpPaste(event: ClipboardEvent): void {
   const pasted = (event.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6)
   if (pasted.length === 0) return
   event.preventDefault()

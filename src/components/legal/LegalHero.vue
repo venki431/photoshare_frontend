@@ -31,20 +31,26 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-defineProps({
-  title: { type: String, required: true },
-  subtitle: { type: String, required: true },
-  badge: { type: String, default: 'Legal' },
-  icon: { type: String, default: 'mdi-shield-check-outline' },
-  iconColor: { type: String, default: '#7c3aed' },
-  lastUpdated: { type: String, default: 'March 31, 2026' },
-  readingTime: { type: [String, Number], default: '8' }
+withDefaults(defineProps<{
+  title: string
+  subtitle: string
+  badge?: string
+  icon?: string
+  iconColor?: string
+  lastUpdated?: string
+  readingTime?: string | number
+}>(), {
+  badge: 'Legal',
+  icon: 'mdi-shield-check-outline',
+  iconColor: '#7c3aed',
+  lastUpdated: 'March 31, 2026',
+  readingTime: '8'
 })
 
-const mounted = ref(false)
+const mounted = ref<boolean>(false)
 onMounted(() => { setTimeout(() => { mounted.value = true }, 100) })
 </script>
 

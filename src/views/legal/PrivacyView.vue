@@ -396,7 +396,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import ScrollProgress from '@/components/legal/ScrollProgress.vue'
 import LegalHero from '@/components/legal/LegalHero.vue'
@@ -404,10 +404,16 @@ import LegalSidebar from '@/components/legal/LegalSidebar.vue'
 import LegalSection from '@/components/legal/LegalSection.vue'
 import HighlightBox from '@/components/legal/HighlightBox.vue'
 
-const navScrolled = ref(false)
-const mobileTocOpen = ref(false)
+interface LegalSectionItem {
+  id: string
+  title: string
+  icon: string
+}
 
-const sections = [
+const navScrolled = ref<boolean>(false)
+const mobileTocOpen = ref<boolean>(false)
+
+const sections: LegalSectionItem[] = [
   { id: 'info-collect', title: 'Information We Collect', icon: 'mdi-database-outline' },
   { id: 'data-usage', title: 'How We Use Data', icon: 'mdi-cog-outline' },
   { id: 'cookies', title: 'Cookies & Tracking', icon: 'mdi-cookie-outline' },
@@ -425,7 +431,7 @@ const sections = [
   { id: 'contact', title: 'Contact Us', icon: 'mdi-email-outline' },
 ]
 
-function scrollTo(id) {
+function scrollTo(id: string): void {
   const el = document.getElementById(id)
   if (el) {
     const top = el.getBoundingClientRect().top + window.scrollY - 100
@@ -433,7 +439,7 @@ function scrollTo(id) {
   }
 }
 
-function handleScroll() {
+function handleScroll(): void {
   navScrolled.value = window.scrollY > 20
 }
 

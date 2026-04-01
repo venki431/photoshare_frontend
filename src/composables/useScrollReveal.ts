@@ -1,14 +1,24 @@
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
+import type { DirectiveBinding, ObjectDirective } from 'vue'
 
-export function useScrollReveal(options = {}) {
+interface ScrollRevealOptions {
+  threshold?: number
+  rootMargin?: string
+  once?: boolean
+}
+
+interface ScrollRevealBinding {
+  delay?: number
+}
+
+export function useScrollReveal(options: ScrollRevealOptions = {}) {
   const {
     threshold = 0.15,
     rootMargin = '0px 0px -50px 0px',
     once = true,
   } = options
 
-  const elements = ref(new Map())
-  let observer = null
+  let observer: IntersectionObserver | null = null
 
   onMounted(() => {
     observer = new IntersectionObserver(
@@ -16,7 +26,7 @@ export function useScrollReveal(options = {}) {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('sr-visible')
-            if (once) observer.unobserve(entry.target)
+            if (once) observer?.unobserve(entry.target)
           } else if (!once) {
             entry.target.classList.remove('sr-visible')
           }
@@ -27,14 +37,14 @@ export function useScrollReveal(options = {}) {
   })
 
   onUnmounted(() => {
-    if (observer) observer.disconnect()
+    observer?.disconnect()
   })
 
-  function vReveal(el, binding) {
+  function vReveal(el: HTMLElement, binding: DirectiveBinding<ScrollRevealBinding>): void {
     el.classList.add('sr-hidden')
-    const delay = binding.value?.delay || 0
+    const delay = binding.value?.delay ?? 0
     if (delay) el.style.transitionDelay = `${delay}ms`
-    const direction = binding.arg || 'up'
+    const direction = binding.arg ?? 'up'
     el.dataset.srDirection = direction
     if (observer) {
       observer.observe(el)
@@ -51,12 +61,12 @@ export function useScrollReveal(options = {}) {
   return { vReveal }
 }
 
-export const scrollRevealDirective = {
-  mounted(el, binding) {
+export const scrollRevealDirective: ObjectDirective<HTMLElement, ScrollRevealBinding> = {
+  mounted(el: HTMLElement, binding: DirectiveBinding<ScrollRevealBinding>) {
     el.classList.add('sr-hidden')
-    const delay = binding.value?.delay || 0
+    const delay = binding.value?.delay ?? 0
     if (delay) el.style.transitionDelay = `${delay}ms`
-    el.dataset.srDirection = binding.arg || 'up'
+    el.dataset.srDirection = binding.arg ?? 'up'
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -68,9 +78,10 @@ export const scrollRevealDirective = {
       { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
     )
     observer.observe(el)
-    el._srObserver = observer
+    ;(el as HTMLElement & { _srObserver?: IntersectionObserver })._srObserver = observer
   },
-  unmounted(el) {
-    if (el._srObserver) el._srObserver.disconnect()
+  unmounted(el: HTMLElement) {
+    const elWithObserver = el as HTMLElement & { _srObserver?: IntersectionObserver }
+    elWithObserver._srObserver?.disconnect()
   },
 }

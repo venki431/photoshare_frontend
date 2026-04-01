@@ -70,7 +70,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, watch, toValue, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -84,69 +84,90 @@ import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { useUploadManager } from '@/composables/useUploadManager'
 import { useProjectStore } from '@/stores/projects'
 import { photoService } from '@/api/services/photo.service'
+import type { ProjectImage, UploadPhase, PreviewImage } from '@/types'
+
+interface NormalizedImage {
+  id: string
+  url: string
+  thumbUrl: string
+  filename: string
+  fileKey: string
+  serverId: string
+  selectedByClient: boolean
+  isPreview?: boolean
+}
 
 const route = useRoute()
-const projectId = route?.params?.id ?? 'demo'
+const projectId = (route?.params?.id as string) ?? 'demo'
 const projectStore = useProjectStore()
 
-const projectShareId = ref('')
-const uploadedImages = ref([])
-const objectUrls = new Set()
-const fileHashSet = new Set()
+const projectShareId = ref<string>('')
+const uploadedImages = ref<NormalizedImage[]>([])
+const objectUrls = new Set<string>()
+const fileHashSet = new Set<string>()
 
 onMounted(async () => {
   try {
     const project = await projectStore.fetchProject(projectId).catch(() => null)
     if (project?.shareId) projectShareId.value = project.shareId
     const existing = project?.images || []
-    uploadedImages.value = existing.map(photo => normalizePhoto(photo))
-    uploadedImages.value.forEach(img => fileHashSet.add(img.fileKey))
+    uploadedImages.value = existing.map((photo) => normalizePhoto(photo as unknown as Record<string, unknown>))
+    uploadedImages.value.forEach((img) => fileHashSet.add(img.fileKey))
   } catch { /* First load may fail */ }
 })
 
-function normalizePhoto(photo) {
+function normalizePhoto(photo: Record<string, unknown>): NormalizedImage {
   return {
-    id: photo.id,
-    url: photo.url,
-    thumbUrl: photo.thumbUrl || photo.thumbnailUrl || photo.url,
-    filename: photo.originalFileName || photo.originalName || photo.filename || 'Photo',
-    fileKey: photo.fileKey || `server_${photo.id}`,
-    serverId: photo.id,
-    selectedByClient: photo.selected || photo.selectedByClient || false
+    id: String(photo.id ?? ''),
+    url: String(photo.url ?? ''),
+    thumbUrl: String(photo.thumbUrl ?? photo.thumbnailUrl ?? photo.url ?? ''),
+    filename: String(photo.originalFileName ?? photo.originalName ?? photo.filename ?? 'Photo'),
+    fileKey: String(photo.fileKey ?? `server_${photo.id}`),
+    serverId: String(photo.id ?? ''),
+    selectedByClient: Boolean(photo.selected ?? photo.selectedByClient ?? false),
   }
 }
 
-const uploadManager = useUploadManager(async (blob, filename, fileMeta, { signal, onProgress } = {}) => {
+const uploadManager = useUploadManager(async (blob: Blob, filename: string, fileMeta: { fileKey: string }, { signal, onProgress }: { signal: AbortSignal; onProgress: (p: number) => void }) => {
   const file = new File([blob], filename, { type: blob.type || 'image/jpeg' })
   const res = await photoService.uploadPhoto(projectId, file, {
     originalName: filename,
     originalSize: blob.size,
   }, { signal, onProgress })
-  const normalized = normalizePhoto(res.data)
+  const normalized = normalizePhoto(res.data as unknown as Record<string, unknown>)
   normalized.fileKey = fileMeta.fileKey
   uploadedImages.value = [...uploadedImages.value, normalized]
 }, { uploadConcurrency: 5, maxRetries: 2 })
 
-const currentPhase = computed(() => toValue(uploadManager.phase))
+const currentPhase = computed<UploadPhase>(() => toValue(uploadManager.phase) as UploadPhase)
 
-const galleryImages = computed(() => {
-  const previews = toValue(uploadManager.previewImages) || []
+const galleryImages = computed<NormalizedImage[]>(() => {
+  const previews = (toValue(uploadManager.previewImages) ?? []) as PreviewImage[]
   return [
     ...uploadedImages.value,
-    ...previews.map(p => ({ ...p, isPreview: true }))
+    ...previews.map((p) => ({
+      id: String(p.id),
+      url: p.url,
+      thumbUrl: p.thumbUrl,
+      filename: p.filename,
+      fileKey: p.fileKey,
+      serverId: '',
+      selectedByClient: false,
+      isPreview: true,
+    } satisfies NormalizedImage)),
   ]
 })
 
-const canAcceptFiles = computed(() => currentPhase.value !== 'compressing')
+const canAcceptFiles = computed<boolean>(() => currentPhase.value !== 'compressing')
 
-function getFileKey(file) {
+function getFileKey(file: File): string {
   return `${file.name}_${file.size}_${file.lastModified}`
 }
 
-function handleFiles(files) {
-  const validFiles = []
-  const skipped = []
-  files.forEach(file => {
+function handleFiles(files: File[]): void {
+  const validFiles: Array<{ file: File; fileKey: string }> = []
+  const skipped: string[] = []
+  files.forEach((file: File) => {
     const key = getFileKey(file)
     if (fileHashSet.has(key)) { skipped.push(file.name); return }
     fileHashSet.add(key)
@@ -163,22 +184,22 @@ function handleFiles(files) {
   uploadManager.processFiles(validFiles)
 }
 
-function handleReset() {
+function handleReset(): void {
   uploadManager.reset()
   fileHashSet.clear()
 }
 
-function revokeUrl(url) {
+function revokeUrl(url: string): void {
   if (objectUrls.has(url)) { URL.revokeObjectURL(url); objectUrls.delete(url) }
 }
 
-async function deleteSingle(id) {
-  const uploadedIndex = uploadedImages.value.findIndex(i => i.id === id)
+async function deleteSingle(id: string): Promise<void> {
+  const uploadedIndex = uploadedImages.value.findIndex((i: NormalizedImage) => i.id === id)
   if (uploadedIndex !== -1) {
     const img = uploadedImages.value[uploadedIndex]
     revokeUrl(img.url)
     fileHashSet.delete(img.fileKey)
-    uploadedImages.value = uploadedImages.value.filter(i => i.id !== id)
+    uploadedImages.value = uploadedImages.value.filter((i: NormalizedImage) => i.id !== id)
     showSnackbar('Image deleted')
     if (img.serverId) {
       try { await projectStore.deletePhoto(img.serverId, projectId) }
@@ -186,17 +207,17 @@ async function deleteSingle(id) {
     }
     return
   }
-  const previews = toValue(uploadManager.previewImages) || []
-  const preview = previews.find(p => p.id === id)
+  const previews = (toValue(uploadManager.previewImages) ?? []) as PreviewImage[]
+  const preview = previews.find((p) => String(p.id) === id)
   if (preview) fileHashSet.delete(preview.fileKey)
-  uploadManager.removePreview(id)
+  uploadManager.removePreview(Number(id))
   showSnackbar('Removed from queue')
 }
 
-async function deleteMultiple(ids) {
-  const idSet = new Set(ids)
-  const serverIds = []
-  uploadedImages.value = uploadedImages.value.filter(img => {
+async function deleteMultiple(ids: string[]): Promise<void> {
+  const idSet = new Set<string>(ids)
+  const serverIds: string[] = []
+  uploadedImages.value = uploadedImages.value.filter((img: NormalizedImage) => {
     if (idSet.has(img.id)) {
       revokeUrl(img.url); fileHashSet.delete(img.fileKey)
       if (img.serverId) serverIds.push(img.serverId)
@@ -204,10 +225,10 @@ async function deleteMultiple(ids) {
     }
     return true
   })
-  const previews = toValue(uploadManager.previewImages) || []
-  const previewIdsToRemove = []
-  previews.forEach(p => {
-    if (idSet.has(p.id)) { fileHashSet.delete(p.fileKey); previewIdsToRemove.push(p.id) }
+  const previews = (toValue(uploadManager.previewImages) ?? []) as PreviewImage[]
+  const previewIdsToRemove: number[] = []
+  previews.forEach((p) => {
+    if (idSet.has(String(p.id))) { fileHashSet.delete(p.fileKey); previewIdsToRemove.push(p.id) }
   })
   if (previewIdsToRemove.length) uploadManager.removeMultiplePreviews(previewIdsToRemove)
   showSnackbar(`${ids.length} item${ids.length !== 1 ? 's' : ''} deleted`)
@@ -217,22 +238,22 @@ async function deleteMultiple(ids) {
   }
 }
 
-function handleDeleteFromPreview(id) {
+function handleDeleteFromPreview(id: string): void {
   deleteSingle(id)
   if (!galleryImages.value.length) { previewOpen.value = false; previewImage.value = null }
 }
 
-const previewOpen = ref(false)
-const previewImage = ref(null)
-function openPreview(img) { previewImage.value = img; previewOpen.value = true }
+const previewOpen = ref<boolean>(false)
+const previewImage = ref<NormalizedImage | null>(null)
+function openPreview(img: unknown): void { previewImage.value = img as NormalizedImage; previewOpen.value = true }
 
-const shareOpen = ref(false)
-const snackbar = reactive({ show: false, text: '', color: 'success' })
-function showSnackbar(text, color = 'success') {
+const shareOpen = ref<boolean>(false)
+const snackbar = reactive<{ show: boolean; text: string; color: string }>({ show: false, text: '', color: 'success' })
+function showSnackbar(text: string, color: string = 'success'): void {
   snackbar.text = text; snackbar.color = color; snackbar.show = true
 }
 
-watch(currentPhase, (phase) => { if (phase === 'done') showSnackbar('Upload complete!') })
+watch(currentPhase, (phase: string) => { if (phase === 'done') showSnackbar('Upload complete!') })
 </script>
 
 <style scoped>

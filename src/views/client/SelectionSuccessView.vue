@@ -72,27 +72,30 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
+import type { ProjectImage, ProjectWithImages } from '@/types'
 
-const props = defineProps({ shareId: String })
+import type { CSSProperties } from 'vue'
+
+const props = defineProps<{ shareId?: string }>()
 const route = useRoute()
 const projectStore = useProjectStore()
 
-const shareId = computed(() => props.shareId || route.params.shareId)
-const project = computed(() => projectStore.getProjectByShareId(shareId.value))
+const shareId = computed<string>(() => props.shareId || (route.params.shareId as string))
+const project = computed(() => projectStore.getProjectByShareId(shareId.value) ?? undefined)
 
 onMounted(() => {
   if (!project.value) projectStore.fetchProjectByShareId(shareId.value).catch(() => {})
 })
 
-const selectedCount = computed(() => project.value?.images?.filter(i => i.selected)?.length ?? 0)
+const selectedCount = computed<number>(() => project.value?.images?.filter((i: ProjectImage) => i.selected)?.length ?? 0)
 
-const colors = ['#4F46E5', '#0EA5E9', '#EC4899', '#F59E0B', '#10B981', '#8B5CF6']
+const colors: string[] = ['#4F46E5', '#0EA5E9', '#EC4899', '#F59E0B', '#10B981', '#8B5CF6']
 
-function confettiStyle(n) {
+function confettiStyle(n: number): CSSProperties {
   const color = colors[n % colors.length]
   const left = Math.random() * 100
   const delay = Math.random() * 2

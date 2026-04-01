@@ -18,7 +18,8 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { Directive } from 'vue'
 import LandingNav from '@/components/landing/LandingNav.vue'
 import HeroSection from '@/components/landing/HeroSection.vue'
 import ProblemSection from '@/components/landing/ProblemSection.vue'
@@ -32,13 +33,13 @@ import CTASection from '@/components/landing/CTASection.vue'
 import FooterSection from '@/components/landing/FooterSection.vue'
 
 // Smooth scroll directive
-const vScrollSmooth = {
-  mounted(el) {
-    el.addEventListener('click', (e) => {
-      const anchor = e.target.closest('a[href^="#"]')
+const vScrollSmooth: Directive<HTMLElement> = {
+  mounted(el: HTMLElement): void {
+    el.addEventListener('click', (e: Event) => {
+      const anchor = (e.target as HTMLElement).closest('a[href^="#"]')
       if (!anchor) return
       e.preventDefault()
-      const target = document.querySelector(anchor.getAttribute('href'))
+      const target = document.querySelector(anchor.getAttribute('href') ?? '')
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }

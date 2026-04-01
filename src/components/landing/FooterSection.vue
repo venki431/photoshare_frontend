@@ -38,16 +38,25 @@
   </footer>
 </template>
 
-<script setup>
-const year = new Date().getFullYear()
+<script setup lang="ts">
+interface Social {
+  icon: string
+}
 
-const socials = [
+interface LinkGroup {
+  title: string
+  items: string[]
+}
+
+const year: number = new Date().getFullYear()
+
+const socials: Social[] = [
   { icon: 'mdi-twitter' },
   { icon: 'mdi-instagram' },
   { icon: 'mdi-linkedin' },
 ]
 
-const links = [
+const links: LinkGroup[] = [
   {
     title: 'Product',
     items: ['Features', 'Pricing', 'Demo', 'Changelog'],

@@ -135,7 +135,7 @@
                   <input
                     v-for="(digit, idx) in otpDigits"
                     :key="idx"
-                    :ref="el => { if (el) otpInputRefs[idx] = el }"
+                    :ref="(el: any) => { if (el) otpInputRefs[idx] = el as HTMLInputElement }"
                     v-model="otpDigits[idx]"
                     maxlength="1"
                     inputmode="numeric"
@@ -199,7 +199,7 @@
   </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -207,22 +207,22 @@ import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 const router = useRouter()
 
-const email = ref('')
-const otpSent = ref(false)
-const errorMsg = ref('')
-const submitting = ref(false)
-const resendCooldown = ref(0)
-const otpDigits = reactive(Array(6).fill(''))
-const otpInputRefs = reactive([])
+const email = ref<string>('')
+const otpSent = ref<boolean>(false)
+const errorMsg = ref<string>('')
+const submitting = ref<boolean>(false)
+const resendCooldown = ref<number>(0)
+const otpDigits = reactive<string[]>(Array(6).fill(''))
+const otpInputRefs = reactive<HTMLInputElement[]>([])
 
-const otpCode = computed(() => otpDigits.join(''))
+const otpCode = computed<string>(() => otpDigits.join(''))
 
-const emailRules = [
-  v => !!v?.trim() || 'Email is required',
-  v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Please enter a valid email address',
+const emailRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !!v?.trim() || 'Email is required',
+  (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Please enter a valid email address',
 ]
 
-async function handleSendOtp() {
+async function handleSendOtp(): Promise<void> {
   if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) return
 
   errorMsg.value = ''
@@ -239,28 +239,28 @@ async function handleSendOtp() {
     startResendCooldown()
     await nextTick()
     otpInputRefs[0]?.focus()
-  } catch (err) {
-    errorMsg.value = err?.message || 'Failed to send verification code. Please try again.'
+  } catch (err: unknown) {
+    errorMsg.value = (err as { message?: string })?.message || 'Failed to send verification code. Please try again.'
   } finally {
     submitting.value = false
   }
 }
 
-async function handleVerifyOtp() {
+async function handleVerifyOtp(): Promise<void> {
   if (otpCode.value.length < 6) return
   errorMsg.value = ''
   submitting.value = true
   try {
     await authStore.verifyOtp(email.value, otpCode.value)
     router.push('/dashboard')
-  } catch (err) {
-    errorMsg.value = err?.message || 'Invalid or expired verification code'
+  } catch (err: unknown) {
+    errorMsg.value = (err as { message?: string })?.message || 'Invalid or expired verification code'
   } finally {
     submitting.value = false
   }
 }
 
-async function handleResendOtp() {
+async function handleResendOtp(): Promise<void> {
   if (resendCooldown.value > 0) return
   errorMsg.value = ''
   try {
@@ -269,12 +269,12 @@ async function handleResendOtp() {
     startResendCooldown()
     await nextTick()
     otpInputRefs[0]?.focus()
-  } catch (err) {
-    errorMsg.value = err?.message || 'Failed to resend code'
+  } catch (err: unknown) {
+    errorMsg.value = (err as { message?: string })?.message || 'Failed to resend code'
   }
 }
 
-function startResendCooldown() {
+function startResendCooldown(): void {
   resendCooldown.value = 60
   const timer = setInterval(() => {
     resendCooldown.value--
@@ -282,7 +282,7 @@ function startResendCooldown() {
   }, 1000)
 }
 
-function onOtpInput(idx) {
+function onOtpInput(idx: number): void {
   const val = otpDigits[idx]
   if (!/^\d$/.test(val)) {
     otpDigits[idx] = ''
@@ -293,11 +293,11 @@ function onOtpInput(idx) {
   if (otpCode.value.length === 6) handleVerifyOtp()
 }
 
-function onOtpBackspace(idx) {
+function onOtpBackspace(idx: number): void {
   if (!otpDigits[idx] && idx > 0) otpInputRefs[idx - 1]?.focus()
 }
 
-function onOtpPaste(event) {
+function onOtpPaste(event: ClipboardEvent): void {
   const pasted = (event.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6)
   if (pasted.length === 0) return
   event.preventDefault()
@@ -309,7 +309,7 @@ function onOtpPaste(event) {
   if (pasted.length === 6) handleVerifyOtp()
 }
 
-function resetToEmailStep() {
+function resetToEmailStep(): void {
   otpSent.value = false
   otpDigits.fill('')
   errorMsg.value = ''

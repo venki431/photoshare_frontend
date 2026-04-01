@@ -50,14 +50,29 @@
   </div>
 </template>
 
-<script setup>
-import { computed, toValue } from 'vue'
+<script setup lang="ts">
+import { computed, toValue, type Ref, type ComputedRef } from 'vue'
+import type { UploadPhase } from '@/types'
 
-const props = defineProps({
-  manager: { type: Object, required: true }
-})
+interface UploadManagerExposed {
+  phase: Ref<UploadPhase> | ComputedRef<UploadPhase>
+  totalFiles: Ref<number>
+  uploadedCount: Ref<number>
+  compressedCount: Ref<number>
+  failedCount: Ref<number>
+  compressionProgress: ComputedRef<number>
+  uploadProgress: ComputedRef<number>
+}
 
-const emit = defineEmits(['reset', 'cancel', 'retry'])
+const props = defineProps<{
+  manager: UploadManagerExposed
+}>()
+
+const emit = defineEmits<{
+  reset: []
+  cancel: []
+  retry: []
+}>()
 
 const phase = computed(() => toValue(props.manager.phase))
 const totalFiles = computed(() => toValue(props.manager.totalFiles))

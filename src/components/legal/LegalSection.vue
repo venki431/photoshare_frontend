@@ -26,21 +26,26 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
+import type { Ref, ComputedRef } from 'vue'
 
-const props = defineProps({
-  id: { type: String, required: true },
-  title: { type: String, required: true },
-  icon: { type: String, default: 'mdi-file-document-outline' },
-  number: { type: [String, Number], default: '' },
-  collapsible: { type: Boolean, default: false }
+const props = withDefaults(defineProps<{
+  id: string
+  title: string
+  icon?: string
+  number?: string | number
+  collapsible?: boolean
+}>(), {
+  icon: 'mdi-file-document-outline',
+  number: '',
+  collapsible: false
 })
 
-const expanded = ref(true)
-const sectionRef = ref(null)
+const expanded: Ref<boolean> = ref(true)
+const sectionRef: Ref<HTMLElement | null> = ref(null)
 
-const formattedNumber = computed(() => {
+const formattedNumber: ComputedRef<string> = computed(() => {
   if (!props.number) return ''
   return String(props.number).padStart(2, '0')
 })

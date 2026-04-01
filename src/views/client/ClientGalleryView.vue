@@ -182,7 +182,7 @@
           <button
             class="modal-btn"
             :class="{ 'modal-btn--active': modalImage?.selected }"
-            @click="toggleSelect(modalImage?.id)"
+            @click="modalImage && toggleSelect(modalImage.id)"
           >
             <v-icon
               :color="modalImage?.selected ? 'pink' : 'white'"
@@ -242,7 +242,7 @@
             :variant="modalImage?.selected ? 'flat' : 'outlined'"
             class="text-none modal-select-btn"
             rounded="lg"
-            @click="toggleSelect(modalImage?.id)"
+            @click="modalImage && toggleSelect(modalImage.id)"
             :prepend-icon="modalImage?.selected ? 'mdi-heart' : 'mdi-heart-outline'"
           >
             {{ modalImage?.selected ? 'Selected' : 'Select' }}
@@ -253,69 +253,70 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
+import type { ProjectImage, ProjectWithImages } from '@/types'
 
-const props = defineProps({ shareId: String })
+const props = defineProps<{ shareId?: string }>()
 const route = useRoute()
 const projectStore = useProjectStore()
 
-const shareId = computed(() => props.shareId || route.params.shareId)
-const project = computed(() => projectStore.getProjectByShareId(shareId.value))
+const shareId = computed<string>(() => props.shareId || (route.params.shareId as string))
+const project = computed(() => projectStore.getProjectByShareId(shareId.value) ?? undefined)
 
 onMounted(() => {
   projectStore.fetchProjectByShareId(shareId.value).catch(() => {})
 })
 
-const filter = ref('all')
-const modalOpen = ref(false)
-const modalImage = ref(null)
-const modalIndex = ref(0)
-const commentText = ref('')
-let touchStartX = 0
+const filter = ref<'all' | 'selected'>('all')
+const modalOpen = ref<boolean>(false)
+const modalImage = ref<ProjectImage | null>(null)
+const modalIndex = ref<number>(0)
+const commentText = ref<string>('')
+let touchStartX: number = 0
 
-const selectedCount = computed(() => project.value?.images?.filter(i => i.selected)?.length ?? 0)
+const selectedCount = computed<number>(() => project.value?.images?.filter((i: ProjectImage) => i.selected)?.length ?? 0)
 
-const displayedImages = computed(() => {
+const displayedImages = computed<ProjectImage[]>(() => {
   if (!project.value?.images) return []
-  if (filter.value === 'selected') return project.value.images.filter(i => i.selected)
+  if (filter.value === 'selected') return project.value.images.filter((i: ProjectImage) => i.selected)
   return project.value.images
 })
 
-function toggleSelect(imageId) {
+function toggleSelect(imageId: string): void {
   if (project.value) projectStore.toggleImageSelection(project.value.shareId, imageId)
 }
 
-function openModal(image, idx) {
+function openModal(image: ProjectImage, idx: number): void {
   modalImage.value = image
   modalIndex.value = idx
   commentText.value = image.comment || ''
   modalOpen.value = true
 }
 
-function prevImage() {
+function prevImage(): void {
   modalIndex.value = (modalIndex.value - 1 + displayedImages.value.length) % displayedImages.value.length
   modalImage.value = displayedImages.value[modalIndex.value]
-  commentText.value = modalImage.value.comment || ''
+  commentText.value = modalImage.value?.comment || ''
 }
 
-function nextImage() {
+function nextImage(): void {
   modalIndex.value = (modalIndex.value + 1) % displayedImages.value.length
   modalImage.value = displayedImages.value[modalIndex.value]
-  commentText.value = modalImage.value.comment || ''
+  commentText.value = modalImage.value?.comment || ''
 }
 
-function saveComment() {
+function saveComment(): void {
   if (commentText.value && modalImage.value) {
-    projectStore.setImageComment(project.value.shareId, modalImage.value.id, commentText.value)
+    projectStore.setImageComment(project.value!.shareId, modalImage.value.id, commentText.value)
     commentText.value = ''
   }
 }
 
-function onTouchStart(e) { touchStartX = e.changedTouches[0].screenX }
-function onTouchEnd(e) {
+function onTouchStart(e: TouchEvent): void { touchStartX = e.changedTouches[0].screenX }
+function onTouchEnd(e: TouchEvent): void {
   const diff = e.changedTouches[0].screenX - touchStartX
   if (Math.abs(diff) > 60) diff > 0 ? prevImage() : nextImage()
 }

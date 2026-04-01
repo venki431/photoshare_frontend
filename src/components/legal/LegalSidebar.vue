@@ -21,26 +21,32 @@
   </aside>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 
-const props = defineProps({
-  sections: { type: Array, required: true }
-})
+interface SidebarSection {
+  id: string
+  title: string
+  icon: string
+}
 
-const activeId = ref('')
-const scrolled = ref(false)
+const props = defineProps<{
+  sections: SidebarSection[]
+}>()
 
-function updateActive() {
+const activeId = ref<string>('')
+const scrolled = ref<boolean>(false)
+
+function updateActive(): void {
   scrolled.value = window.scrollY > 300
 
-  const ids = props.sections.map(s => s.id)
-  let current = ids[0] || ''
+  const ids: string[] = props.sections.map((s: SidebarSection) => s.id)
+  let current: string = ids[0] || ''
 
   for (const id of ids) {
-    const el = document.getElementById(id)
+    const el: HTMLElement | null = document.getElementById(id)
     if (el) {
-      const rect = el.getBoundingClientRect()
+      const rect: DOMRect = el.getBoundingClientRect()
       if (rect.top <= 140) current = id
     }
   }
@@ -48,10 +54,10 @@ function updateActive() {
   activeId.value = current
 }
 
-function scrollToSection(id) {
-  const el = document.getElementById(id)
+function scrollToSection(id: string): void {
+  const el: HTMLElement | null = document.getElementById(id)
   if (el) {
-    const top = el.getBoundingClientRect().top + window.scrollY - 100
+    const top: number = el.getBoundingClientRect().top + window.scrollY - 100
     window.scrollTo({ top, behavior: 'smooth' })
   }
 }

@@ -66,8 +66,16 @@
   </section>
 </template>
 
-<script setup>
-const steps = [
+<script setup lang="ts">
+interface Step {
+  icon: string
+  title: string
+  text: string
+  color: string
+  bg: string
+}
+
+const steps: Step[] = [
   {
     icon: 'mdi-cloud-upload-outline',
     title: 'Upload Photos',

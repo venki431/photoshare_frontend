@@ -87,12 +87,12 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-const mounted = ref(false)
-const avatarColors = ['#7c3aed', '#2563eb', '#059669', '#d97706']
-const avatarInitials = ['AK', 'SM', 'RJ', 'PD']
+const mounted = ref<boolean>(false)
+const avatarColors: string[] = ['#7c3aed', '#2563eb', '#059669', '#d97706']
+const avatarInitials: string[] = ['AK', 'SM', 'RJ', 'PD']
 
 onMounted(() => {
   requestAnimationFrame(() => {
@@ -100,7 +100,7 @@ onMounted(() => {
   })
 })
 
-function scrollToPreview() {
+function scrollToPreview(): void {
   document.getElementById('preview')?.scrollIntoView({ behavior: 'smooth' })
 }
 </script>

@@ -100,30 +100,31 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
+import type { ProjectImage, ProjectWithImages } from '@/types'
 
-const props = defineProps({ shareId: String })
+const props = defineProps<{ shareId?: string }>()
 const route = useRoute()
 const router = useRouter()
 const projectStore = useProjectStore()
 
-const shareId = computed(() => props.shareId || route.params.shareId)
-const project = computed(() => projectStore.getProjectByShareId(shareId.value))
+const shareId = computed<string>(() => props.shareId || (route.params.shareId as string))
+const project = computed(() => projectStore.getProjectByShareId(shareId.value) ?? undefined)
 
 onMounted(() => {
   if (!project.value) projectStore.fetchProjectByShareId(shareId.value).catch(() => {})
 })
 
-const selectedImages = computed(() => project.value?.images?.filter(i => i.selected) ?? [])
+const selectedImages = computed<ProjectImage[]>(() => project.value?.images?.filter((i: ProjectImage) => i.selected) ?? [])
 
-function toggleSelect(imageId) {
+function toggleSelect(imageId: string): void {
   if (project.value) projectStore.toggleImageSelection(project.value.shareId, imageId)
 }
 
-async function handleSubmit() {
+async function handleSubmit(): Promise<void> {
   await projectStore.submitSelections(shareId.value)
   router.push(`/gallery/${shareId.value}/success`)
 }

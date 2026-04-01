@@ -54,8 +54,18 @@
   </section>
 </template>
 
-<script setup>
-const plans = [
+<script setup lang="ts">
+interface Plan {
+  name: string
+  price: string
+  period: string
+  desc: string
+  cta: string
+  featured: boolean
+  features: string[]
+}
+
+const plans: Plan[] = [
   {
     name: 'Free',
     price: '₹0',

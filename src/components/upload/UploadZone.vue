@@ -5,7 +5,7 @@
     @dragover.prevent="drag = true"
     @dragleave.prevent="drag = false"
     @drop.prevent="handleDrop"
-    @click="fileInput.click()"
+    @click="fileInput?.click()"
   >
     <input
       ref="fileInput"
@@ -57,24 +57,27 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 
-const emit = defineEmits(['files'])
+const emit = defineEmits<{
+  files: [files: File[]]
+}>()
 
-const fileInput = ref(null)
+const fileInput = ref<HTMLInputElement | null>(null)
 const drag = ref(false)
 
-function handleDrop(e) {
+function handleDrop(e: DragEvent): void {
   drag.value = false
-  const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'))
+  const files = [...(e.dataTransfer?.files ?? [])].filter(f => f.type.startsWith('image/'))
   if (files.length) emit('files', files)
 }
 
-function handleSelect(e) {
-  const files = [...e.target.files].filter(f => f.type.startsWith('image/'))
+function handleSelect(e: Event): void {
+  const target = e.target as HTMLInputElement
+  const files = [...(target.files ?? [])].filter(f => f.type.startsWith('image/'))
   if (files.length) emit('files', files)
-  e.target.value = ''
+  target.value = ''
 }
 </script>
 

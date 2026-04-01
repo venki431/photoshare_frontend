@@ -38,14 +38,21 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  icon: { type: String, default: 'mdi-folder-open-outline' },
-  title: { type: String, default: 'Nothing here yet' },
-  description: { type: String, default: '' },
-  tips: { type: Array, default: () => [] },
-  variant: { type: String, default: 'primary' },
-  compact: { type: Boolean, default: false }
+<script setup lang="ts">
+withDefaults(defineProps<{
+  icon?: string
+  title?: string
+  description?: string
+  tips?: string[]
+  variant?: string
+  compact?: boolean
+}>(), {
+  icon: 'mdi-folder-open-outline',
+  title: 'Nothing here yet',
+  description: '',
+  tips: () => [],
+  variant: 'primary',
+  compact: false,
 })
 </script>
 

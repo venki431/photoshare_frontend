@@ -24,13 +24,13 @@
   </nav>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 
-const scrolled = ref(false)
-const menuOpen = ref(false)
+const scrolled = ref<boolean>(false)
+const menuOpen = ref<boolean>(false)
 
-function handleScroll() {
+function handleScroll(): void {
   scrolled.value = window.scrollY > 20
 }
 

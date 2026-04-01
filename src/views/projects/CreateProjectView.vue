@@ -182,7 +182,7 @@
 
                   <!-- Image -->
                   <v-img
-                    :src="file.preview"
+                    :src="file.preview ?? undefined"
                     cover
                     aspect-ratio="1"
                     class="rounded-lg photo-img"
@@ -321,7 +321,7 @@
                   <v-img
                     v-for="(file, n) in uploadedFiles.slice(0, 6)"
                     :key="n"
-                    :src="file.preview"
+                    :src="file.preview ?? undefined"
                     :width="64"
                     :height="64"
                     cover
@@ -393,7 +393,7 @@
         <img
           v-if="uploadedFiles[lightbox.index]"
           :key="lightbox.index"
-          :src="uploadedFiles[lightbox.index].preview"
+          :src="uploadedFiles[lightbox.index].preview ?? undefined"
           class="lightbox-image"
           @click.stop
         />
@@ -431,33 +431,50 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import imageCompression from 'browser-image-compression'
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
+
+interface UploadedFile {
+  file: File | Blob
+  preview: string | null
+  originalSize: number
+  compressedSize: number
+}
+
+interface CreateForm {
+  name: string
+  eventType: string
+  notes: string
+  passwordProtect: boolean
+  password: string
+  allowComments: boolean
+  selectionLimit: number | null
+}
 
 const router = useRouter()
 const projectStore = useProjectStore()
 
-const step = ref(0)
-const steps = ['Details', 'Upload', 'Settings']
-const isDragging = ref(false)
-const uploading = ref(false)
-const uploadProgress = ref(0)
-const uploadedCount = ref(0)
-const totalUpload = ref(0)
-const uploadedFiles = ref([])
-const fileInput = ref(null)
-const visibleCount = ref(60)
-const selectedPhotos = ref(new Set())
+const step = ref<number>(0)
+const steps: string[] = ['Details', 'Upload', 'Settings']
+const isDragging = ref<boolean>(false)
+const uploading = ref<boolean>(false)
+const uploadProgress = ref<number>(0)
+const uploadedCount = ref<number>(0)
+const totalUpload = ref<number>(0)
+const uploadedFiles = ref<UploadedFile[]>([])
+const fileInput = ref<HTMLInputElement | null>(null)
+const visibleCount = ref<number>(60)
+const selectedPhotos = ref<Set<number>>(new Set())
 
-const lightbox = reactive({
+const lightbox = reactive<{ open: boolean; index: number }>({
   open: false,
   index: 0,
 })
 
-const form = reactive({
+const form = reactive<CreateForm>({
   name: '',
   eventType: '',
   notes: '',
@@ -467,7 +484,7 @@ const form = reactive({
   selectionLimit: null,
 })
 
-const processingPhase = computed(() => {
+const processingPhase = computed<string>(() => {
   const pct = uploadProgress.value
   if (pct < 20) return 'Preparing images\u2026'
   if (pct < 50) return 'Compressing & optimizing\u2026'
@@ -475,35 +492,36 @@ const processingPhase = computed(() => {
   return 'Finishing up\u2026'
 })
 
-const visibleFiles = computed(() => {
+const visibleFiles = computed<UploadedFile[]>(() => {
   return uploadedFiles.value.slice(0, visibleCount.value)
 })
 
-const eventTypes = [
+const eventTypes: string[] = [
   'Wedding', 'Birthday', 'Engagement', 'Corporate Event',
   'Portrait Session', 'Product Shoot', 'Other',
 ]
 
 // ── File input ──
 
-function triggerFileInput() {
+function triggerFileInput(): void {
   fileInput.value?.click()
 }
 
-function onFileSelect(e) {
-  handleFiles(Array.from(e.target.files))
-  e.target.value = ''
+function onFileSelect(e: Event): void {
+  const target = e.target as HTMLInputElement
+  handleFiles(Array.from(target.files ?? []))
+  target.value = ''
 }
 
-function onDrop(e) {
+function onDrop(e: DragEvent): void {
   isDragging.value = false
-  handleFiles(Array.from(e.dataTransfer.files))
+  handleFiles(Array.from(e.dataTransfer?.files ?? []))
 }
 
 // ── Upload & compress ──
 
-async function handleFiles(files) {
-  const imageFiles = files.filter(f => f.type.startsWith('image/'))
+async function handleFiles(files: File[]): Promise<void> {
+  const imageFiles = files.filter((f: File) => f.type.startsWith('image/'))
   if (!imageFiles.length) return
 
   uploading.value = true
@@ -512,13 +530,13 @@ async function handleFiles(files) {
   uploadProgress.value = 0
 
   const batchSize = 1
-  const tempStorage = []
+  const tempStorage: UploadedFile[] = []
 
   for (let i = 0; i < imageFiles.length; i += batchSize) {
     const batch = imageFiles.slice(i, i + batchSize)
 
-    const processedBatch = await Promise.all(
-      batch.map(async (file) => {
+    const processedBatch: UploadedFile[] = await Promise.all(
+      batch.map(async (file: File): Promise<UploadedFile> => {
         try {
           const compressed = await imageCompression(file, {
             maxSizeMB: 2,
@@ -556,15 +574,15 @@ async function handleFiles(files) {
   generatePreviews()
 }
 
-function generatePreviews() {
+function generatePreviews(): void {
   let index = 0
   const chunkSize = 20
 
-  function processChunk() {
+  function processChunk(): void {
     for (let i = 0; i < chunkSize && index < uploadedFiles.value.length; i++) {
       const item = uploadedFiles.value[index]
       if (!item.preview) {
-        item.preview = URL.createObjectURL(item.file)
+        item.preview = URL.createObjectURL(item.file as Blob)
       }
       index++
     }
@@ -578,8 +596,8 @@ function generatePreviews() {
 
 // ── Selection & deletion ──
 
-function toggleSelect(index) {
-  const s = new Set(selectedPhotos.value)
+function toggleSelect(index: number): void {
+  const s = new Set<number>(selectedPhotos.value)
   if (s.has(index)) {
     s.delete(index)
   } else {
@@ -588,7 +606,7 @@ function toggleSelect(index) {
   selectedPhotos.value = s
 }
 
-function deleteSingle(index) {
+function deleteSingle(index: number): void {
   const item = uploadedFiles.value[index]
   if (item?.preview) URL.revokeObjectURL(item.preview)
 
@@ -596,7 +614,7 @@ function deleteSingle(index) {
   uploadedFiles.value = [...uploadedFiles.value]
 
   // Fix selected indices after removal
-  const updated = new Set()
+  const updated = new Set<number>()
   for (const idx of selectedPhotos.value) {
     if (idx < index) updated.add(idx)
     else if (idx > index) updated.add(idx - 1)
@@ -613,36 +631,36 @@ function deleteSingle(index) {
   }
 }
 
-function deleteSelected() {
-  const indices = Array.from(selectedPhotos.value).sort((a, b) => b - a)
+function deleteSelected(): void {
+  const indices = Array.from(selectedPhotos.value).sort((a: number, b: number) => b - a)
   for (const idx of indices) {
     const item = uploadedFiles.value[idx]
     if (item?.preview) URL.revokeObjectURL(item.preview)
     uploadedFiles.value.splice(idx, 1)
   }
   uploadedFiles.value = [...uploadedFiles.value]
-  selectedPhotos.value = new Set()
+  selectedPhotos.value = new Set<number>()
 }
 
-function clearAllPhotos() {
+function clearAllPhotos(): void {
   for (const item of uploadedFiles.value) {
     if (item?.preview) URL.revokeObjectURL(item.preview)
   }
   uploadedFiles.value = []
-  selectedPhotos.value = new Set()
+  selectedPhotos.value = new Set<number>()
   visibleCount.value = 60
 }
 
 // ── Lightbox ──
 
-function openLightbox(index) {
+function openLightbox(index: number): void {
   lightbox.index = index
   lightbox.open = true
 }
 
 // ── Keyboard nav for lightbox ──
 
-function onKeydown(e) {
+function onKeydown(e: KeyboardEvent): void {
   if (!lightbox.open) return
   if (e.key === 'ArrowLeft' && lightbox.index > 0) lightbox.index--
   else if (e.key === 'ArrowRight' && lightbox.index < uploadedFiles.value.length - 1) lightbox.index++
@@ -650,7 +668,6 @@ function onKeydown(e) {
   else if (e.key === 'Delete' || e.key === 'Backspace') deleteSingle(lightbox.index)
 }
 
-import { onMounted, onUnmounted } from 'vue'
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
@@ -658,20 +675,13 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
 // ── Create project ──
 
-async function handleCreate() {
+async function handleCreate(): Promise<void> {
   try {
-    const formData = new FormData()
-
-    uploadedFiles.value.forEach((item) => {
-      formData.append('images', item.file)
+    const project = await projectStore.createProject({
+      name: form.name,
+      eventType: form.eventType,
+      password: form.password || undefined,
     })
-
-    formData.append('name', form.name)
-    formData.append('eventType', form.eventType)
-    formData.append('imageCount', uploadedFiles.value.length || 24)
-    formData.append('password', form.password)
-
-    const project = await projectStore.createProject(formData)
     router.push(`/projects/${project.id}`)
   } catch {
     // handled by store error state

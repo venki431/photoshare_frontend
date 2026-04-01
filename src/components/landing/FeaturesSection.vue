@@ -31,12 +31,22 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 
-const hoveredIndex = ref(-1)
+interface Feature {
+  icon: string
+  title: string
+  text: string
+  tag: string
+  color: string
+  bg: string
+  glow: string
+}
 
-const features = [
+const hoveredIndex = ref<number>(-1)
+
+const features: Feature[] = [
   {
     icon: 'mdi-cloud-upload-outline',
     title: 'Bulk Upload + Compression',

@@ -10,11 +10,15 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  icon: { type: String, default: 'mdi-information-outline' },
-  title: { type: String, default: '' },
-  variant: { type: String, default: 'info' }
+<script setup lang="ts">
+withDefaults(defineProps<{
+  icon?: string
+  title?: string
+  variant?: string
+}>(), {
+  icon: 'mdi-information-outline',
+  title: '',
+  variant: 'info'
 })
 </script>
 

@@ -59,17 +59,18 @@
   </router-link>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import StatusBadge from './StatusBadge.vue'
+import type { Project } from '@/types'
 
-defineProps({
-  project: { type: Object, required: true }
-})
+defineProps<{
+  project: Project
+}>()
 
-function formatDate(dateStr) {
+function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 </script>

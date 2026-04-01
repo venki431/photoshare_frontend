@@ -67,14 +67,21 @@
   </section>
 </template>
 
-<script setup>
-const photographerSteps = [
+<script setup lang="ts">
+interface HowStep {
+  icon: string
+  title: string
+  text: string
+  color: string
+}
+
+const photographerSteps: HowStep[] = [
   { icon: 'mdi-plus', title: 'Create a Project', text: 'Set up a new project for your event in seconds.', color: '#7c3aed' },
   { icon: 'mdi-upload', title: 'Upload Images', text: 'Drag and drop your photos. Auto-compression handles the rest.', color: '#8b5cf6' },
   { icon: 'mdi-share-variant', title: 'Share the Link', text: 'One click generates a beautiful, shareable gallery link.', color: '#a78bfa' },
 ]
 
-const clientSteps = [
+const clientSteps: HowStep[] = [
   { icon: 'mdi-link-variant', title: 'Open the Link', text: 'No signup needed. Just click the link from your photographer.', color: '#2563eb' },
   { icon: 'mdi-heart', title: 'Select Photos', text: 'Browse the gallery, heart your favorites, build your shortlist.', color: '#3b82f6' },
   { icon: 'mdi-check-circle', title: 'Done!', text: 'Submit your selections. Your photographer gets notified instantly.', color: '#60a5fa' },

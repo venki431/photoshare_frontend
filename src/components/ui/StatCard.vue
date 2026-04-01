@@ -29,15 +29,15 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  title: String,
-  value: [String, Number],
-  icon: String,
-  color: { type: String, default: 'primary' },
-  chip: String,
-  chipColor: String
-})
+<script setup lang="ts">
+defineProps<{
+  title?: string
+  value?: string | number
+  icon?: string
+  color?: string
+  chip?: string
+  chipColor?: string
+}>()
 </script>
 
 <style scoped>

@@ -9,10 +9,13 @@
   </section>
 </template>
 
-<script setup>
-defineProps({
-  gradient: { type: Boolean, default: false },
-  narrow: { type: Boolean, default: false }
+<script setup lang="ts">
+withDefaults(defineProps<{
+  gradient?: boolean
+  narrow?: boolean
+}>(), {
+  gradient: false,
+  narrow: false,
 })
 </script>
 

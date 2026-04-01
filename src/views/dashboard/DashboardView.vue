@@ -146,7 +146,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectStore } from '@/stores/projects'
@@ -163,7 +163,7 @@ onMounted(() => {
   }
 })
 
-const firstName = computed(() => authStore.userName?.split(' ')[0] || 'there')
+const firstName = computed(() => authStore.userName?.split(' ')[0] ?? 'there')
 
 const greeting = computed(() => {
   const h = new Date().getHours()
@@ -179,7 +179,7 @@ const stats = computed(() => [
     title: 'Total Projects',
     value: projectStore.totalProjects,
     icon: 'mdi-folder-image',
-    color: 'primary'
+    color: 'primary',
   },
   {
     title: 'Pending Review',
@@ -187,19 +187,19 @@ const stats = computed(() => [
     icon: 'mdi-clock-outline',
     color: 'warning',
     chip: projectStore.pendingCount > 0 ? 'Action needed' : undefined,
-    chipColor: 'warning'
+    chipColor: 'warning',
   },
   {
     title: 'In Review',
     value: projectStore.inReviewCount,
     icon: 'mdi-eye-outline',
-    color: 'info'
+    color: 'info',
   },
   {
     title: 'Completed',
     value: projectStore.completedCount,
     icon: 'mdi-check-circle-outline',
-    color: 'success'
+    color: 'success',
   },
 ])
 </script>

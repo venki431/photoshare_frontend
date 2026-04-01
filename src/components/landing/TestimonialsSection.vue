@@ -32,8 +32,16 @@
   </section>
 </template>
 
-<script setup>
-const testimonials = [
+<script setup lang="ts">
+interface Testimonial {
+  name: string
+  role: string
+  initials: string
+  color: string
+  text: string
+}
+
+const testimonials: Testimonial[] = [
   {
     name: 'Arjun Mehta',
     role: 'Wedding Photographer',

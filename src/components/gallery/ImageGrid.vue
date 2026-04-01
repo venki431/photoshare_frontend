@@ -138,43 +138,62 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import type { UploadPhase } from '@/types'
 
-const props = defineProps({
-  images: { type: Array, default: () => [] },
-  uploadPhase: { type: String, default: 'idle' },
-  projectCompleted: { type: Boolean, default: false }
+interface GridImage {
+  id: string
+  url: string
+  thumbUrl: string
+  filename: string
+  selectedByClient?: boolean
+}
+
+const props = withDefaults(defineProps<{
+  images?: GridImage[]
+  uploadPhase?: UploadPhase
+  projectCompleted?: boolean
+}>(), {
+  images: () => [],
+  uploadPhase: 'idle',
+  projectCompleted: false,
 })
 
-const emit = defineEmits(['preview', 'delete', 'bulk-delete', 'start-upload', 'share'])
+const emit = defineEmits<{
+  preview: [img: GridImage]
+  delete: [id: string]
+  'bulk-delete': [ids: string[]]
+  'start-upload': []
+  share: []
+}>()
 
 const selectMode = ref(false)
-const selectedIds = ref(new Set())
+const selectedIds = ref<Set<string>>(new Set())
 
 const hasClientSelections = computed(() => props.images.some(img => img.selectedByClient))
 
-function isSelected(id) { return selectedIds.value.has(id) }
+function isSelected(id: string): boolean { return selectedIds.value.has(id) }
 
-function toggleSelection(id) {
+function toggleSelection(id: string): void {
   const next = new Set(selectedIds.value)
   if (next.has(id)) next.delete(id)
   else next.add(id)
   selectedIds.value = next
 }
 
-function toggleSelectAll() {
+function toggleSelectAll(): void {
   if (selectedIds.value.size === props.images.length) selectedIds.value = new Set()
   else selectedIds.value = new Set(props.images.map(i => i.id))
 }
 
-function toggleSelectMode() {
+function toggleSelectMode(): void {
   selectMode.value = !selectMode.value
   if (!selectMode.value) selectedIds.value = new Set()
 }
 
-function handleCardClick(img) {
+function handleCardClick(img: GridImage): void {
   if (selectMode.value) toggleSelection(img.id)
   else emit('preview', img)
 }

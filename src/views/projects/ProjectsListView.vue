@@ -271,22 +271,44 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useProjectStore } from "@/stores/projects";
+import type { Project, ProjectStatus } from "@/types";
 import ProjectCard from "@/components/ui/ProjectCard.vue";
 import StatusBadge from "@/components/ui/StatusBadge.vue";
 import EmptyState from "@/components/ui/EmptyState.vue";
 
+interface VFormInstance {
+  validate: () => Promise<{ valid: boolean }>;
+}
+
+interface FilterOption {
+  label: string;
+  value: string;
+  dot?: boolean;
+  count: number;
+}
+
+interface CreateFormState {
+  name: string;
+  eventType: string;
+  clientName: string;
+  clientEmail: string;
+  clientMobile: string;
+  clientImage: string | null;
+  clientImagePreview: string | null;
+}
+
 const router = useRouter();
 const projectStore = useProjectStore();
 
-const search = ref("");
-const statusFilter = ref("all");
-const viewMode = ref("grid");
+const search = ref<string>("");
+const statusFilter = ref<string>("all");
+const viewMode = ref<"grid" | "list">("grid");
 
-const filterOptions = computed(() => [
+const filterOptions = computed<FilterOption[]>(() => [
   { label: "All", value: "all", count: projectStore.totalProjects },
   { label: "Pending", value: "pending", dot: true, count: projectStore.pendingCount },
   { label: "In Review", value: "in_review", dot: true, count: projectStore.inReviewCount },
@@ -294,13 +316,13 @@ const filterOptions = computed(() => [
 ]);
 
 // Create Project Dialog
-const createDialog = ref(false);
-const creating = ref(false);
-const createFormRef = ref(null);
-const fileInput = ref(null);
-const formValid = ref(false);
+const createDialog = ref<boolean>(false);
+const creating = ref<boolean>(false);
+const createFormRef = ref<VFormInstance | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+const formValid = ref<boolean>(false);
 
-const createForm = reactive({
+const createForm = reactive<CreateFormState>({
   name: "",
   eventType: "",
   clientName: "",
@@ -310,7 +332,7 @@ const createForm = reactive({
   clientImagePreview: null,
 });
 
-const eventTypes = [
+const eventTypes: Array<{ text: string; value: string }> = [
   { text: "Wedding", value: "wedding" },
   { text: "Birthday", value: "birthday" },
   { text: "Corporate", value: "corporate" },
@@ -319,30 +341,30 @@ const eventTypes = [
   { text: "Other", value: "other" },
 ];
 
-const nameRules = [
-  (v) => !!v?.trim() || "Project name is required",
-  (v) => v?.trim().length >= 3 || "Project name must be at least 3 characters",
+const nameRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !!v?.trim() || "Project name is required",
+  (v: string) => (v?.trim().length ?? 0) >= 3 || "Project name must be at least 3 characters",
 ];
-const eventTypeRules = [(v) => !!v || "Please select an event type"];
-const clientNameRules = [
-  (v) => !!v?.trim() || "Customer name is required",
-  (v) => v?.trim().length >= 2 || "Please enter a valid name",
+const eventTypeRules: Array<(v: string) => boolean | string> = [(v: string) => !!v || "Please select an event type"];
+const clientNameRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !!v?.trim() || "Customer name is required",
+  (v: string) => (v?.trim().length ?? 0) >= 2 || "Please enter a valid name",
 ];
-const emailRules = [
-  (v) => !v || /.+@.+\..+/.test(v) || "Please enter a valid email address",
+const emailRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !v || /.+@.+\..+/.test(v) || "Please enter a valid email address",
 ];
-const mobileRules = [
-  (v) => !!v?.trim() || "Customer mobile number is required",
-  (v) =>
-    /^[\d+\s-]{10,15}$/.test(v?.replace(/\s/g, "")) ||
+const mobileRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !!v?.trim() || "Customer mobile number is required",
+  (v: string) =>
+    /^[\d+\s-]{10,15}$/.test(v?.replace(/\s/g, "") ?? "") ||
     "Please enter a valid mobile number",
 ];
 
-function triggerFileInput() {
+function triggerFileInput(): void {
   fileInput.value?.click();
 }
 
-function compressImage(file, maxWidth = 512, quality = 0.7) {
+function compressImage(file: File, maxWidth: number = 512, quality: number = 0.7): Promise<string> {
   return new Promise((resolve) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -354,7 +376,7 @@ function compressImage(file, maxWidth = 512, quality = 0.7) {
       const canvas = document.createElement("canvas");
       canvas.width = w;
       canvas.height = h;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d")!;
       ctx.drawImage(img, 0, 0, w, h);
       resolve(canvas.toDataURL("image/jpeg", quality));
     };
@@ -362,8 +384,8 @@ function compressImage(file, maxWidth = 512, quality = 0.7) {
   });
 }
 
-async function handleImageUpload(e) {
-  const file = e.target.files[0];
+async function handleImageUpload(e: Event): Promise<void> {
+  const file = (e.target as HTMLInputElement).files?.[0];
   if (!file || !file.type.startsWith("image/")) return;
 
   const base64 = await compressImage(file);
@@ -371,23 +393,21 @@ async function handleImageUpload(e) {
   createForm.clientImagePreview = base64;
 }
 
-async function handleCreate() {
-  const { valid } = await createFormRef.value.validate();
+async function handleCreate(): Promise<void> {
+  const { valid } = await createFormRef.value!.validate();
   if (!valid) return;
 
   creating.value = true;
   try {
-    const payload = {
+    const payload: Record<string, string | undefined> = {
       name: createForm.name.trim(),
       eventType: createForm.eventType,
       clientName: createForm.clientName.trim(),
       clientMobile: createForm.clientMobile.trim(),
+      clientEmail: createForm.clientEmail?.trim() || undefined,
     };
 
-    if (createForm.clientEmail?.trim()) payload.clientEmail = createForm.clientEmail.trim();
-    if (createForm.clientImage) payload.coverImage = createForm.clientImage;
-
-    const project = await projectStore.createProject(payload);
+    const project = await projectStore.createProject(payload as { name: string; eventType: string; [key: string]: string | undefined });
     resetAndClose();
     router.push(`/projects/${project.id}`);
   } catch {
@@ -397,7 +417,7 @@ async function handleCreate() {
   }
 }
 
-function resetAndClose() {
+function resetAndClose(): void {
   createDialog.value = false;
   Object.assign(createForm, {
     name: "",
@@ -408,10 +428,10 @@ function resetAndClose() {
     clientImage: null,
     clientImagePreview: null,
   });
-  fileInput.value && (fileInput.value.value = "");
+  if (fileInput.value) fileInput.value.value = "";
 }
 
-function clearFilters() {
+function clearFilters(): void {
   search.value = "";
   statusFilter.value = "all";
 }
@@ -420,7 +440,7 @@ onMounted(() => {
   projectStore.fetchProjects().catch(() => {});
 });
 
-const filteredProjects = computed(() => {
+const filteredProjects = computed<Project[]>(() => {
   let list = projectStore.projects;
 
   if (statusFilter.value !== "all") {
@@ -435,7 +455,7 @@ const filteredProjects = computed(() => {
   return list;
 });
 
-function formatDate(dateStr) {
+function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",

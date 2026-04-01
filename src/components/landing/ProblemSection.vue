@@ -45,8 +45,16 @@
   </section>
 </template>
 
-<script setup>
-const problems = [
+<script setup lang="ts">
+interface Problem {
+  icon: string
+  title: string
+  text: string
+  color: string
+  bg: string
+}
+
+const problems: Problem[] = [
   {
     icon: 'mdi-car-side',
     title: 'Traveling to Clients',

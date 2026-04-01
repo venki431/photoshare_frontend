@@ -105,33 +105,42 @@
   </v-dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 
-const props = defineProps({
-  modelValue: Boolean,
-  shareId: { type: String, default: '' }
+const props = withDefaults(defineProps<{
+  modelValue?: boolean
+  shareId?: string
+}>(), {
+  modelValue: false,
+  shareId: '',
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+}>()
 
 const model = computed({
   get: () => props.modelValue,
-  set: (v) => emit('update:modelValue', v)
+  set: (v: boolean) => emit('update:modelValue', v),
 })
 
 const shareUrl = computed(() => `${window.location.origin}/gallery/${props.shareId}`)
 
 const copied = ref(false)
-let copyTimeout = null
+let copyTimeout: ReturnType<typeof setTimeout> | null = null
 
-function selectLink() {
+function selectLink(): void {
   const range = document.createRange()
   const el = document.querySelector('.link-text')
-  if (el) { range.selectNodeContents(el); window.getSelection()?.removeAllRanges(); window.getSelection()?.addRange(range) }
+  if (el) {
+    range.selectNodeContents(el)
+    window.getSelection()?.removeAllRanges()
+    window.getSelection()?.addRange(range)
+  }
 }
 
-async function copyLink() {
+async function copyLink(): Promise<void> {
   try {
     await navigator.clipboard.writeText(shareUrl.value)
   } catch {
@@ -143,7 +152,7 @@ async function copyLink() {
     document.body.removeChild(input)
   }
   copied.value = true
-  clearTimeout(copyTimeout)
+  if (copyTimeout) clearTimeout(copyTimeout)
   copyTimeout = setTimeout(() => { copied.value = false }, 2000)
 }
 
@@ -159,7 +168,7 @@ const expiryOptions = [
 ]
 const expiry = ref('never')
 
-async function handleSave() {
+async function handleSave(): Promise<void> {
   await copyLink()
   model.value = false
 }

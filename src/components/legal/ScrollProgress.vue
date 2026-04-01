@@ -4,15 +4,15 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 
-const progress = ref(0)
+const progress = ref<number>(0)
 
-function handleScroll() {
-  const el = document.documentElement
-  const scrollTop = el.scrollTop || document.body.scrollTop
-  const scrollHeight = el.scrollHeight - el.clientHeight
+function handleScroll(): void {
+  const el: HTMLElement = document.documentElement
+  const scrollTop: number = el.scrollTop || document.body.scrollTop
+  const scrollHeight: number = el.scrollHeight - el.clientHeight
   progress.value = scrollHeight > 0 ? Math.min((scrollTop / scrollHeight) * 100, 100) : 0
 }
 

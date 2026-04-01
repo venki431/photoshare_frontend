@@ -55,21 +55,37 @@
   </v-dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch, nextTick } from 'vue'
 
-const props = defineProps({
-  modelValue: Boolean,
-  images: { type: Array, default: () => [] },
-  current: { type: Object, default: null }
+interface PreviewImage {
+  id: string
+  url: string
+  thumbUrl: string
+  filename: string
+}
+
+const props = withDefaults(defineProps<{
+  modelValue?: boolean
+  images?: PreviewImage[]
+  current?: PreviewImage | null
+}>(), {
+  modelValue: false,
+  images: () => [],
+  current: null,
 })
 
-const emit = defineEmits(['update:modelValue', 'update:current', 'delete'])
-const modalRef = ref(null)
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+  'update:current': [image: PreviewImage]
+  delete: [id: string]
+}>()
+
+const modalRef = ref<HTMLDivElement | null>(null)
 
 const model = computed({
   get: () => props.modelValue,
-  set: (v) => emit('update:modelValue', v)
+  set: (v: boolean) => emit('update:modelValue', v),
 })
 
 watch(model, (v) => {
@@ -78,10 +94,10 @@ watch(model, (v) => {
 
 const currentIndex = computed(() => {
   if (!props.current || !props.images.length) return -1
-  return props.images.findIndex(i => i.id === props.current.id)
+  return props.images.findIndex(i => i.id === props.current?.id)
 })
 
-const image = computed(() => {
+const image = computed<PreviewImage | null>(() => {
   const idx = currentIndex.value
   if (idx < 0 || idx >= props.images.length) return null
   return props.images[idx]
@@ -90,24 +106,24 @@ const image = computed(() => {
 const thumbStart = computed(() => Math.max(0, currentIndex.value - 4))
 const thumbEnd = computed(() => Math.min(props.images.length, thumbStart.value + 9))
 
-function close() { model.value = false }
+function close(): void { model.value = false }
 
-function navigateTo(index) {
+function navigateTo(index: number): void {
   if (!props.images.length) return
   emit('update:current', props.images[index])
 }
 
-function next() {
+function next(): void {
   if (props.images.length <= 1) return
   navigateTo((currentIndex.value + 1) % props.images.length)
 }
 
-function prev() {
+function prev(): void {
   if (props.images.length <= 1) return
   navigateTo((currentIndex.value - 1 + props.images.length) % props.images.length)
 }
 
-function handleDelete() {
+function handleDelete(): void {
   if (!image.value) return
   const id = image.value.id
   const idx = currentIndex.value

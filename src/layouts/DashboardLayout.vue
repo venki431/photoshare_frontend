@@ -105,12 +105,18 @@
   </v-layout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectStore } from '@/stores/projects'
+
+interface NavItem {
+  title: string
+  icon: string
+  to: string
+}
 
 const { lgAndUp } = useDisplay()
 const authStore = useAuthStore()
@@ -120,7 +126,7 @@ const route = useRoute()
 
 const drawer = ref(true)
 
-const navItems = [
+const navItems: NavItem[] = [
   { title: 'Dashboard', icon: 'mdi-view-dashboard-outline', to: '/dashboard' },
   { title: 'Projects', icon: 'mdi-folder-image', to: '/projects' },
 ]
@@ -131,7 +137,7 @@ watch(() => route.path, () => {
   }
 })
 
-function handleLogout() {
+function handleLogout(): void {
   authStore.logout()
   router.push('/login')
 }

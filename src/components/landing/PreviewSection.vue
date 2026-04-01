@@ -78,13 +78,19 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 
-const activeTab = ref('all')
-const selectedPhotos = ref(new Set([2, 5, 8]))
+interface Photo {
+  id: number
+  gradient: string
+}
 
-const photos = [
+const activeTab: Ref<string> = ref('all')
+const selectedPhotos: Ref<Set<number>> = ref(new Set([2, 5, 8]))
+
+const photos: Photo[] = [
   { id: 1, gradient: 'linear-gradient(135deg, #c7d2fe, #e0e7ff)' },
   { id: 2, gradient: 'linear-gradient(135deg, #fbcfe8, #fce7f3)' },
   { id: 3, gradient: 'linear-gradient(135deg, #a7f3d0, #d1fae5)' },
@@ -99,14 +105,14 @@ const photos = [
   { id: 12, gradient: 'linear-gradient(135deg, #6ee7b7, #a7f3d0)' },
 ]
 
-const visiblePhotos = computed(() => {
+const visiblePhotos: ComputedRef<Photo[]> = computed(() => {
   if (activeTab.value === 'selected') {
-    return photos.filter(p => selectedPhotos.value.has(p.id))
+    return photos.filter((p: Photo) => selectedPhotos.value.has(p.id))
   }
   return photos
 })
 
-function toggleSelect(id) {
+function toggleSelect(id: number): void {
   const s = new Set(selectedPhotos.value)
   if (s.has(id)) s.delete(id)
   else s.add(id)
