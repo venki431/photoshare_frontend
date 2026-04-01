@@ -7,7 +7,16 @@
         <span>Projects</span>
       </button>
       <div class="project-header__info">
-        <h1 class="project-title">{{ projectStore.currentProject.name }}</h1>
+        <div class="project-title-row">
+          <h1 class="project-title">{{ projectStore.currentProject.name }}</h1>
+          <v-btn
+            icon="mdi-delete-outline"
+            size="small"
+            variant="text"
+            color="error"
+            @click="deleteProjectDialog = true"
+          />
+        </div>
         <div class="project-meta-row">
           <StatusBadge :status="projectStore.currentProject.status" />
           <span class="meta-divider" />
@@ -21,6 +30,39 @@
           </span>
         </div>
       </div>
+    </div>
+
+    <!-- Delete Project Confirmation -->
+    <v-dialog v-model="deleteProjectDialog" max-width="420" persistent>
+      <v-card rounded="xl">
+        <v-card-title class="text-h6 pt-5 px-6">Delete Project?</v-card-title>
+        <v-card-text class="px-6">
+          This will permanently delete <strong>{{ projectStore.currentProject?.name }}</strong> and all its photos. This action cannot be undone.
+        </v-card-text>
+        <v-card-actions class="px-6 pb-5">
+          <v-spacer />
+          <v-btn variant="text" class="text-none" @click="deleteProjectDialog = false">Cancel</v-btn>
+          <v-btn color="error" variant="flat" class="text-none" :loading="deletingProject" @click="handleDeleteProject">
+            Delete Project
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Download Selected Names -->
+    <div v-if="projectStore.currentProject?.status === 'completed' && projectStore.currentProject?.selectedCount > 0" class="download-bar">
+      <v-btn
+        variant="tonal"
+        color="primary"
+        class="text-none"
+        size="default"
+        rounded="lg"
+        prepend-icon="mdi-download"
+        :loading="downloading"
+        @click="downloadSelectedNames"
+      >
+        Download Selected ({{ projectStore.currentProject.selectedCount }})
+      </v-btn>
     </div>
 
     <!-- Upload Zone (hide during compression only) -->
@@ -46,11 +88,31 @@
       @share="shareOpen = true"
     />
 
+    <!-- Load More Photos -->
+    <div v-if="galleryImages.length > 0 && projectStore.hasMorePhotos" class="load-more-wrapper">
+      <v-btn
+        variant="outlined"
+        color="primary"
+        class="text-none load-more-btn"
+        size="large"
+        rounded="lg"
+        :loading="projectStore.loadingMore"
+        @click="loadMorePhotos"
+      >
+        <v-icon start>mdi-refresh</v-icon>
+        Load More Photos
+      </v-btn>
+      <p class="load-more-meta">
+        Showing {{ galleryImages.length }} of {{ projectStore.photoPagination.total }} photos
+      </p>
+    </div>
+
     <!-- Preview Modal -->
     <PreviewModal
       v-model="previewOpen"
       v-model:current="previewImage"
       :images="galleryImages"
+      :show-delete="projectStore.currentProject?.status !== 'completed'"
       @delete="handleDeleteFromPreview"
     />
 
@@ -72,7 +134,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, toValue, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import UploadZone from '@/components/upload/UploadZone.vue'
 import UploadProgress from '@/components/upload/UploadProgress.vue'
@@ -98,9 +160,13 @@ interface NormalizedImage {
 }
 
 const route = useRoute()
+const router = useRouter()
 const projectId = (route?.params?.id as string) ?? 'demo'
 const projectStore = useProjectStore()
 
+const downloading = ref<boolean>(false)
+const deleteProjectDialog = ref<boolean>(false)
+const deletingProject = ref<boolean>(false)
 const projectShareId = ref<string>('')
 const uploadedImages = ref<NormalizedImage[]>([])
 const objectUrls = new Set<string>()
@@ -115,6 +181,46 @@ onMounted(async () => {
     uploadedImages.value.forEach((img) => fileHashSet.add(img.fileKey))
   } catch { /* First load may fail */ }
 })
+
+async function handleDeleteProject(): Promise<void> {
+  deletingProject.value = true
+  try {
+    await projectStore.deleteProject(projectId)
+    deleteProjectDialog.value = false
+    router.push('/projects')
+  } catch {
+    showSnackbar('Failed to delete project', 'error')
+  } finally {
+    deletingProject.value = false
+  }
+}
+
+async function downloadSelectedNames(): Promise<void> {
+  downloading.value = true
+  try {
+    await photoService.downloadSelectedNames(projectId)
+    showSnackbar('Download started')
+  } catch {
+    showSnackbar('Failed to download', 'error')
+  } finally {
+    downloading.value = false
+  }
+}
+
+async function loadMorePhotos(): Promise<void> {
+  try {
+    await projectStore.fetchMorePhotos(projectId)
+    const newImages = projectStore.currentProject?.images || []
+    const existingKeys = new Set(uploadedImages.value.map(img => img.fileKey))
+    const additions = newImages
+      .filter(p => !existingKeys.has(`server_${p.id}`))
+      .map(p => normalizePhoto(p as unknown as Record<string, unknown>))
+    if (additions.length) {
+      uploadedImages.value = [...uploadedImages.value, ...additions]
+      additions.forEach(img => fileHashSet.add(img.fileKey))
+    }
+  } catch { /* handled by store */ }
+}
 
 function normalizePhoto(photo: Record<string, unknown>): NormalizedImage {
   return {
@@ -287,6 +393,12 @@ watch(currentPhase, (phase: string) => { if (phase === 'done') showSnackbar('Upl
 
 .back-btn:hover { color: var(--ps-primary); }
 
+.project-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .project-title {
   font-size: clamp(22px, 3vw, 28px);
   font-weight: 800;
@@ -318,4 +430,27 @@ watch(currentPhase, (phase: string) => { if (phase === 'done') showSnackbar('Upl
 }
 
 .meta-text .v-icon { opacity: 0.7; }
+
+.download-bar {
+  display: flex;
+  align-items: center;
+}
+
+.load-more-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.load-more-btn {
+  min-width: 180px;
+}
+
+.load-more-meta {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
+}
 </style>

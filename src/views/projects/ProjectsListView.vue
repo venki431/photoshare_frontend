@@ -5,7 +5,9 @@
       <div class="page-header__text">
         <h1 class="page-title">Projects</h1>
         <p class="page-subtitle">
-          {{ projectStore.totalProjects }} total project{{ projectStore.totalProjects !== 1 ? "s" : "" }}
+          {{ projectStore.totalProjects }} total project{{
+            projectStore.totalProjects !== 1 ? "s" : ""
+          }}
           <span v-if="projectStore.pendingCount" class="subtitle-badge">
             &middot; {{ projectStore.pendingCount }} pending review
           </span>
@@ -59,7 +61,9 @@
                 <v-img :src="createForm.clientImagePreview" cover />
               </v-avatar>
               <div v-else class="avatar-upload__placeholder">
-                <v-icon size="36" color="grey-lighten-1">mdi-account-circle-outline</v-icon>
+                <v-icon size="36" color="grey-lighten-1"
+                  >mdi-account-circle-outline</v-icon
+                >
               </div>
               <div class="avatar-upload__overlay">
                 <v-icon size="20" color="white">mdi-camera</v-icon>
@@ -248,9 +252,50 @@
       </router-link>
     </div>
 
+    <!-- Load More -->
+    <div
+      v-if="
+        filteredProjects.length > 0 &&
+        projectStore.hasMoreProjects &&
+        statusFilter === 'all' &&
+        !search
+      "
+      class="load-more-wrapper ps-animate-in"
+    >
+      <v-btn
+        variant="outlined"
+        color="primary"
+        class="text-none load-more-btn"
+        size="large"
+        rounded="lg"
+        :loading="projectStore.loadingMore"
+        @click="loadMore"
+      >
+        <v-icon start>mdi-refresh</v-icon>
+        Load More
+      </v-btn>
+      <p class="load-more-meta">
+        Showing {{ projectStore.projects.length }} of
+        {{ projectStore.pagination.total }} projects
+      </p>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="projectStore.loading && !projectStore.projects.length" class="loading-wrapper ps-animate-in">
+      <div class="loading-grid">
+        <div v-for="n in 6" :key="n" class="loading-card">
+          <div class="ps-shimmer" style="width: 100%; height: 160px; border-radius: 12px 12px 0 0" />
+          <div style="padding: 16px; display: flex; flex-direction: column; gap: 8px">
+            <div class="ps-shimmer" style="width: 70%; height: 16px; border-radius: 8px" />
+            <div class="ps-shimmer" style="width: 40%; height: 12px; border-radius: 6px" />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Empty State -->
     <EmptyState
-      v-else
+      v-else-if="!filteredProjects.length && !projectStore.loading"
       icon="mdi-magnify"
       title="No projects found"
       description="Try adjusting your search or filters to find what you're looking for."
@@ -311,8 +356,18 @@ const viewMode = ref<"grid" | "list">("grid");
 const filterOptions = computed<FilterOption[]>(() => [
   { label: "All", value: "all", count: projectStore.totalProjects },
   { label: "Pending", value: "pending", dot: true, count: projectStore.pendingCount },
-  { label: "In Review", value: "in_review", dot: true, count: projectStore.inReviewCount },
-  { label: "Completed", value: "completed", dot: true, count: projectStore.completedCount },
+  {
+    label: "In Review",
+    value: "in_review",
+    dot: true,
+    count: projectStore.inReviewCount,
+  },
+  {
+    label: "Completed",
+    value: "completed",
+    dot: true,
+    count: projectStore.completedCount,
+  },
 ]);
 
 // Create Project Dialog
@@ -343,9 +398,12 @@ const eventTypes: Array<{ text: string; value: string }> = [
 
 const nameRules: Array<(v: string) => boolean | string> = [
   (v: string) => !!v?.trim() || "Project name is required",
-  (v: string) => (v?.trim().length ?? 0) >= 3 || "Project name must be at least 3 characters",
+  (v: string) =>
+    (v?.trim().length ?? 0) >= 3 || "Project name must be at least 3 characters",
 ];
-const eventTypeRules: Array<(v: string) => boolean | string> = [(v: string) => !!v || "Please select an event type"];
+const eventTypeRules: Array<(v: string) => boolean | string> = [
+  (v: string) => !!v || "Please select an event type",
+];
 const clientNameRules: Array<(v: string) => boolean | string> = [
   (v: string) => !!v?.trim() || "Customer name is required",
   (v: string) => (v?.trim().length ?? 0) >= 2 || "Please enter a valid name",
@@ -364,7 +422,11 @@ function triggerFileInput(): void {
   fileInput.value?.click();
 }
 
-function compressImage(file: File, maxWidth: number = 512, quality: number = 0.7): Promise<string> {
+function compressImage(
+  file: File,
+  maxWidth: number = 512,
+  quality: number = 0.7
+): Promise<string> {
   return new Promise((resolve) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -407,7 +469,9 @@ async function handleCreate(): Promise<void> {
       clientEmail: createForm.clientEmail?.trim() || undefined,
     };
 
-    const project = await projectStore.createProject(payload as { name: string; eventType: string; [key: string]: string | undefined });
+    const project = await projectStore.createProject(
+      payload as { name: string; eventType: string; [key: string]: string | undefined }
+    );
     resetAndClose();
     router.push(`/projects/${project.id}`);
   } catch {
@@ -437,8 +501,12 @@ function clearFilters(): void {
 }
 
 onMounted(() => {
-  projectStore.fetchProjects().catch(() => {});
+  projectStore.fetchProjects({ perPage: 10 }).catch(() => {});
 });
+
+function loadMore(): void {
+  projectStore.fetchMoreProjects().catch(() => {});
+}
 
 const filteredProjects = computed<Project[]>(() => {
   let list = projectStore.projects;
@@ -733,9 +801,15 @@ function formatDate(dateStr: string): string {
   border-radius: 50%;
 }
 
-.filter-dot--pending { background: #f59e0b; }
-.filter-dot--in_review { background: #3b82f6; }
-.filter-dot--completed { background: #10b981; }
+.filter-dot--pending {
+  background: #f59e0b;
+}
+.filter-dot--in_review {
+  background: #3b82f6;
+}
+.filter-dot--completed {
+  background: #10b981;
+}
 
 .filter-count {
   font-size: 11px;
@@ -827,6 +901,55 @@ function formatDate(dateStr: string): string {
 .list-item__arrow {
   color: #cbd5e1;
   flex-shrink: 0;
+}
+
+/* ====================== LOADING STATE ====================== */
+.loading-wrapper {
+  width: 100%;
+}
+
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.loading-card {
+  border-radius: var(--ps-radius-xl);
+  background: white;
+  border: 1px solid var(--ps-border);
+  overflow: hidden;
+}
+
+@media (max-width: 960px) {
+  .loading-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .loading-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ====================== LOAD MORE ====================== */
+.load-more-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.load-more-btn {
+  min-width: 160px;
+}
+
+.load-more-meta {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
 }
 
 /* ====================== PREMIUM FORM STYLING ====================== */

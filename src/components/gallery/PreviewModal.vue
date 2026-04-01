@@ -14,9 +14,10 @@
           </span>
         </div>
 
-        <button class="header-btn header-btn--danger" @click="handleDelete">
+        <button v-if="showDelete" class="header-btn header-btn--danger" @click="handleDelete">
           <v-icon size="20" color="white">mdi-delete-outline</v-icon>
         </button>
+        <div v-else style="width: 40px" />
       </div>
 
       <!-- Image viewport -->
@@ -69,10 +70,12 @@ const props = withDefaults(defineProps<{
   modelValue?: boolean
   images?: PreviewImage[]
   current?: PreviewImage | null
+  showDelete?: boolean
 }>(), {
   modelValue: false,
   images: () => [],
   current: null,
+  showDelete: true,
 })
 
 const emit = defineEmits<{

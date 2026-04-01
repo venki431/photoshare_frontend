@@ -16,6 +16,7 @@ import type { Photo } from '@/types'
 export const useProjectStore = defineStore('projects', () => {
   const projects = ref<Project[]>([])
   const loading = ref(false)
+  const loadingMore = ref(false)
   const error = ref<string | null>(null)
   const currentProject = ref<ProjectWithImages | null>(null)
   const pagination = ref<PaginationMeta>({
@@ -24,6 +25,15 @@ export const useProjectStore = defineStore('projects', () => {
     perPage: 10,
     totalPages: 1,
   })
+  const photoPagination = ref<PaginationMeta>({
+    total: 0,
+    page: 1,
+    perPage: 10,
+    totalPages: 1,
+  })
+
+  const hasMoreProjects = computed(() => pagination.value.page < pagination.value.totalPages)
+  const hasMorePhotos = computed(() => photoPagination.value.page < photoPagination.value.totalPages)
 
   const totalProjects = computed(() => pagination.value.total || projects.value.length)
   const pendingCount = computed(() => projects.value.filter(p => p.status === 'pending').length)
@@ -63,13 +73,30 @@ export const useProjectStore = defineStore('projects', () => {
     }
   }
 
+  async function fetchMoreProjects(params: ProjectListParams = {}): Promise<void> {
+    if (!hasMoreProjects.value || loadingMore.value) return
+    loadingMore.value = true
+    try {
+      const nextPage = pagination.value.page + 1
+      const res = await projectService.getProjects({ ...params, page: nextPage, perPage: pagination.value.perPage })
+      projects.value = [...projects.value, ...(res.data ?? [])]
+      if (res.meta) pagination.value = res.meta
+    } catch (err: unknown) {
+      error.value = (err as { message?: string })?.message ?? 'Failed to load more projects'
+      throw err
+    } finally {
+      loadingMore.value = false
+    }
+  }
+
   async function fetchProject(id: string): Promise<ProjectWithImages> {
     _begin()
     try {
       const [projectRes, photosRes] = await Promise.all([
         projectService.getProject(id),
-        photoService.getPhotosByProject(id, { perPage: 500 }),
+        photoService.getPhotosByProject(id, { page: 1, perPage: 10 }),
       ])
+      if (photosRes.meta) photoPagination.value = photosRes.meta
       const project: ProjectWithImages = {
         ...(projectRes.data as Project),
         images: (photosRes.data ?? []).map(photoToProjectImage),
@@ -103,7 +130,7 @@ export const useProjectStore = defineStore('projects', () => {
       const selectedIds = new Set(selection.selectedIds ?? [])
       const comments = selection.comments ?? {}
 
-      const photosRes = await photoService.getPhotosByProject(projectData.id, { perPage: 500 })
+      const photosRes = await photoService.getPhotosByProject(projectData.id, { perPage: 10 })
 
       const project: ProjectWithImages = {
         ...(projectData as unknown as Project),
@@ -120,6 +147,24 @@ export const useProjectStore = defineStore('projects', () => {
       throw err
     } finally {
       _end()
+    }
+  }
+
+  async function fetchMorePhotos(projectId: string): Promise<void> {
+    if (!hasMorePhotos.value || loadingMore.value) return
+    loadingMore.value = true
+    try {
+      const nextPage = photoPagination.value.page + 1
+      const res = await photoService.getPhotosByProject(projectId, { page: nextPage, perPage: photoPagination.value.perPage })
+      if (res.meta) photoPagination.value = res.meta
+      if (currentProject.value?.id === projectId && currentProject.value.images) {
+        currentProject.value.images = [...currentProject.value.images, ...(res.data ?? []).map(photoToProjectImage)]
+      }
+    } catch (err: unknown) {
+      error.value = (err as { message?: string })?.message ?? 'Failed to load more photos'
+      throw err
+    } finally {
+      loadingMore.value = false
     }
   }
 
@@ -260,9 +305,10 @@ export const useProjectStore = defineStore('projects', () => {
   }
 
   return {
-    projects, loading, error, currentProject, pagination,
+    projects, loading, loadingMore, error, currentProject, pagination, photoPagination,
     totalProjects, pendingCount, completedCount, inReviewCount, totalImages,
-    fetchProjects, fetchProject, fetchProjectByShareId,
+    hasMoreProjects, hasMorePhotos,
+    fetchProjects, fetchMoreProjects, fetchProject, fetchMorePhotos, fetchProjectByShareId,
     getProject, getProjectByShareId,
     createProject, updateProject, deleteProject,
     uploadPhoto, deletePhoto, bulkDeletePhotos,

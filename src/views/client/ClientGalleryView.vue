@@ -168,88 +168,13 @@
       </div>
     </transition>
 
-    <!-- Fullscreen Image Modal -->
-    <v-dialog v-model="modalOpen" fullscreen transition="dialog-bottom-transition">
-      <div class="image-modal">
-        <!-- Modal Header -->
-        <div class="modal-header">
-          <button class="modal-btn" @click="modalOpen = false">
-            <v-icon size="20" color="white">mdi-close</v-icon>
-          </button>
-          <span class="modal-counter">
-            {{ modalIndex + 1 }} / {{ displayedImages.length }}
-          </span>
-          <button
-            class="modal-btn"
-            :class="{ 'modal-btn--active': modalImage?.selected }"
-            @click="modalImage && toggleSelect(modalImage.id)"
-          >
-            <v-icon
-              :color="modalImage?.selected ? 'pink' : 'white'"
-              size="20"
-            >
-              {{ modalImage?.selected ? 'mdi-heart' : 'mdi-heart-outline' }}
-            </v-icon>
-          </button>
-        </div>
-
-        <!-- Image Display -->
-        <div class="modal-body" @touchstart="onTouchStart" @touchend="onTouchEnd">
-          <button class="modal-nav modal-nav-prev d-none d-sm-flex" @click="prevImage">
-            <v-icon size="28" color="white">mdi-chevron-left</v-icon>
-          </button>
-          <v-img
-            v-if="modalImage"
-            :src="modalImage.url"
-            contain
-            max-height="80vh"
-            max-width="95vw"
-            class="mx-auto"
-          />
-          <button class="modal-nav modal-nav-next d-none d-sm-flex" @click="nextImage">
-            <v-icon size="28" color="white">mdi-chevron-right</v-icon>
-          </button>
-        </div>
-
-        <!-- Modal Footer -->
-        <div class="modal-footer">
-          <div class="comment-wrapper">
-            <v-text-field
-              v-model="commentText"
-              placeholder="Add a comment about this photo..."
-              variant="solo-filled"
-              bg-color="rgba(255,255,255,0.08)"
-              density="compact"
-              hide-details
-              rounded="pill"
-              class="comment-input"
-              @keydown.enter="saveComment"
-            >
-              <template #append-inner>
-                <v-btn
-                  v-if="commentText"
-                  icon="mdi-send"
-                  size="x-small"
-                  variant="text"
-                  color="primary"
-                  @click="saveComment"
-                />
-              </template>
-            </v-text-field>
-          </div>
-          <v-btn
-            :color="modalImage?.selected ? 'pink' : 'white'"
-            :variant="modalImage?.selected ? 'flat' : 'outlined'"
-            class="text-none modal-select-btn"
-            rounded="lg"
-            @click="modalImage && toggleSelect(modalImage.id)"
-            :prepend-icon="modalImage?.selected ? 'mdi-heart' : 'mdi-heart-outline'"
-          >
-            {{ modalImage?.selected ? 'Selected' : 'Select' }}
-          </v-btn>
-        </div>
-      </div>
-    </v-dialog>
+    <!-- Preview Modal (same as photographer view) -->
+    <PreviewModal
+      v-model="modalOpen"
+      v-model:current="modalImage"
+      :images="previewImages"
+      :show-delete="false"
+    />
   </div>
 </template>
 
@@ -257,7 +182,15 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
-import type { ProjectImage, ProjectWithImages } from '@/types'
+import PreviewModal from '@/components/gallery/PreviewModal.vue'
+import type { ProjectImage } from '@/types'
+
+interface PreviewImg {
+  id: string
+  url: string
+  thumbUrl: string
+  filename: string
+}
 
 const props = defineProps<{ shareId?: string }>()
 const route = useRoute()
@@ -272,10 +205,7 @@ onMounted(() => {
 
 const filter = ref<'all' | 'selected'>('all')
 const modalOpen = ref<boolean>(false)
-const modalImage = ref<ProjectImage | null>(null)
-const modalIndex = ref<number>(0)
-const commentText = ref<string>('')
-let touchStartX: number = 0
+const modalImage = ref<PreviewImg | null>(null)
 
 const selectedCount = computed<number>(() => project.value?.images?.filter((i: ProjectImage) => i.selected)?.length ?? 0)
 
@@ -285,40 +215,22 @@ const displayedImages = computed<ProjectImage[]>(() => {
   return project.value.images
 })
 
+const previewImages = computed<PreviewImg[]>(() =>
+  displayedImages.value.map(i => ({
+    id: i.id,
+    url: i.url ?? i.thumbUrl,
+    thumbUrl: i.thumbUrl,
+    filename: i.originalFileName ?? i.filename ?? 'Photo',
+  }))
+)
+
 function toggleSelect(imageId: string): void {
   if (project.value) projectStore.toggleImageSelection(project.value.shareId, imageId)
 }
 
 function openModal(image: ProjectImage, idx: number): void {
-  modalImage.value = image
-  modalIndex.value = idx
-  commentText.value = image.comment || ''
+  modalImage.value = previewImages.value[idx] ?? null
   modalOpen.value = true
-}
-
-function prevImage(): void {
-  modalIndex.value = (modalIndex.value - 1 + displayedImages.value.length) % displayedImages.value.length
-  modalImage.value = displayedImages.value[modalIndex.value]
-  commentText.value = modalImage.value?.comment || ''
-}
-
-function nextImage(): void {
-  modalIndex.value = (modalIndex.value + 1) % displayedImages.value.length
-  modalImage.value = displayedImages.value[modalIndex.value]
-  commentText.value = modalImage.value?.comment || ''
-}
-
-function saveComment(): void {
-  if (commentText.value && modalImage.value) {
-    projectStore.setImageComment(project.value!.shareId, modalImage.value.id, commentText.value)
-    commentText.value = ''
-  }
-}
-
-function onTouchStart(e: TouchEvent): void { touchStartX = e.changedTouches[0].screenX }
-function onTouchEnd(e: TouchEvent): void {
-  const diff = e.changedTouches[0].screenX - touchStartX
-  if (Math.abs(diff) > 60) diff > 0 ? prevImage() : nextImage()
 }
 </script>
 
@@ -710,88 +622,6 @@ function onTouchEnd(e: TouchEvent): void {
   border-radius: 14px !important;
 }
 
-/* ─── Modal ───────────────────────────────────────────────────────────── */
-
-.image-modal {
-  background: rgba(0, 0, 0, 0.97);
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  flex-shrink: 0;
-}
-
-.modal-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--ps-radius-md);
-  border: none;
-  background: rgba(255, 255, 255, 0.08);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background var(--ps-duration-fast);
-}
-
-.modal-btn:hover { background: rgba(255, 255, 255, 0.15); }
-.modal-btn--active { background: rgba(236, 72, 153, 0.2); }
-
-.modal-counter {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 500;
-}
-
-.modal-body {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.modal-nav {
-  position: absolute;
-  z-index: 10;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.08);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--ps-duration-fast);
-}
-
-.modal-nav:hover { background: rgba(255, 255, 255, 0.15); }
-.modal-nav-prev { left: 12px; }
-.modal-nav-next { right: 12px; }
-
-.modal-footer {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px var(--ps-gutter);
-  padding-bottom: calc(12px + env(safe-area-inset-bottom));
-  flex-shrink: 0;
-}
-
-.comment-wrapper { flex: 1; }
-.comment-input :deep(input) { color: white !important; }
-.comment-input :deep(.v-field) { border-radius: 100px !important; }
-.modal-select-btn { flex-shrink: 0; }
-
 /* ─── Transitions ─────────────────────────────────────────────────────── */
 
 .slide-up-enter-active, .slide-up-leave-active {
@@ -804,7 +634,7 @@ function onTouchEnd(e: TouchEvent): void {
 
 @media (max-width: 600px) {
   .selection-bar-content { flex-wrap: wrap; }
-  .review-btn, .modal-select-btn { width: 100%; }
+  .review-btn { width: 100%; }
   .hero-instructions { display: none; }
 }
 </style>

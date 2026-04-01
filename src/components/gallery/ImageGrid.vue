@@ -107,7 +107,7 @@
             <button class="overlay-btn" @click.stop="$emit('preview', img)">
               <v-icon size="18" color="white">mdi-eye-outline</v-icon>
             </button>
-            <button class="overlay-btn overlay-btn--danger" @click.stop="$emit('delete', img.id)">
+            <button v-if="projectCompleted" class="overlay-btn overlay-btn--danger" @click.stop="$emit('delete', img.id)">
               <v-icon size="18" color="white">mdi-delete-outline</v-icon>
             </button>
           </div>

@@ -110,6 +110,23 @@ export const photoService = {
     return safeCall(() => apiClient.post<BulkDeleteResponse>(ENDPOINTS.PHOTOS.BULK_DELETE, { ids }))
   },
 
+  async downloadSelectedNames(projectId: string): Promise<void> {
+    const token = localStorage.getItem('ps_auth_token')
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://api.photoshare.app/v1'
+    const url = `${baseUrl}${ENDPOINTS.PHOTOS.SELECTED_DOWNLOAD(projectId)}`
+    const res = await fetch(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+    if (!res.ok) throw new Error('Failed to download selected image names')
+    const text = await res.text()
+    const blob = new Blob([text], { type: 'text/plain' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'selected_images.txt'
+    a.click()
+    URL.revokeObjectURL(a.href)
+  },
+
   async getSelectedPhotos(projectId: string): Promise<ApiResponse<SelectedPhotosResponse>> {
     if (USE_MOCK) return photoMock.getSelectedPhotos(projectId)
     return safeCall(() =>
