@@ -20,6 +20,10 @@ export const projectService = {
     return safeCall(() => apiClient.get<Project[]>(ENDPOINTS.PROJECTS.LIST, { params: params as Record<string, string | number> }))
   },
 
+  async getProjectsByFolder(folderId: string, params: ProjectListParams = {}): Promise<ApiResponse<Project[]>> {
+    return safeCall(() => apiClient.get<Project[]>(ENDPOINTS.PROJECTS.BY_FOLDER(folderId), { params: params as Record<string, string | number> }))
+  },
+
   async getProject(id: string): Promise<ApiResponse<Project>> {
     if (USE_MOCK) return projectMock.getProject(id)
     return safeCall(() => apiClient.get<Project>(ENDPOINTS.PROJECTS.DETAIL(id)))

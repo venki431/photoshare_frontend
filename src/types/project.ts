@@ -12,6 +12,7 @@ export type EventType =
 export interface Project {
   id: string
   name: string
+  folderId: string
   eventType: EventType | string
   status: ProjectStatus
   imageCount: number
@@ -36,6 +37,7 @@ export interface SharedProject extends Omit<Project, 'password'> {
 export interface CreateProjectPayload {
   name: string
   eventType: string
+  folderId?: string
   password?: string
   clientName?: string
   clientEmail?: string

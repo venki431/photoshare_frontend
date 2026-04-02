@@ -108,6 +108,21 @@
               />
             </div>
 
+            <div v-if="folderItems.length > 0" class="ps-field">
+              <v-select
+                v-model="createForm.folderId"
+                placeholder="Folder (optional)"
+                :items="folderItems"
+                item-title="title"
+                item-value="value"
+                clearable
+                hint="Leave empty for Default Folder"
+                persistent-hint
+                variant="outlined"
+                class="ps-input"
+              />
+            </div>
+
             <div class="ps-field">
               <v-text-field
                 v-model="createForm.clientName"
@@ -320,6 +335,7 @@
 import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useProjectStore } from "@/stores/projects";
+import { useFolderStore } from "@/stores/folders";
 import type { Project, ProjectStatus } from "@/types";
 import ProjectCard from "@/components/ui/ProjectCard.vue";
 import StatusBadge from "@/components/ui/StatusBadge.vue";
@@ -339,6 +355,7 @@ interface FilterOption {
 interface CreateFormState {
   name: string;
   eventType: string;
+  folderId: string;
   clientName: string;
   clientEmail: string;
   clientMobile: string;
@@ -348,6 +365,7 @@ interface CreateFormState {
 
 const router = useRouter();
 const projectStore = useProjectStore();
+const folderStore = useFolderStore();
 
 const search = ref<string>("");
 const statusFilter = ref<string>("all");
@@ -377,9 +395,14 @@ const createFormRef = ref<VFormInstance | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 const formValid = ref<boolean>(false);
 
+const folderItems = computed(() =>
+  folderStore.folders.map(f => ({ title: f.name, value: f.id }))
+);
+
 const createForm = reactive<CreateFormState>({
   name: "",
   eventType: "",
+  folderId: "",
   clientName: "",
   clientEmail: "",
   clientMobile: "",
@@ -464,6 +487,7 @@ async function handleCreate(): Promise<void> {
     const payload: Record<string, string | undefined> = {
       name: createForm.name.trim(),
       eventType: createForm.eventType,
+      folderId: createForm.folderId || undefined,
       clientName: createForm.clientName.trim(),
       clientMobile: createForm.clientMobile.trim(),
       clientEmail: createForm.clientEmail?.trim() || undefined,
@@ -486,6 +510,7 @@ function resetAndClose(): void {
   Object.assign(createForm, {
     name: "",
     eventType: "",
+    folderId: "",
     clientName: "",
     clientEmail: "",
     clientMobile: "",

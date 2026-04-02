@@ -59,6 +59,11 @@
           </router-link>
         </nav>
 
+        <!-- Folders -->
+        <div class="sidebar__folders">
+          <FolderList />
+        </div>
+
         <!-- Quick Stats -->
         <div class="sidebar__stats">
           <div class="nav-label">Quick Stats</div>
@@ -111,6 +116,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectStore } from '@/stores/projects'
+import { useFolderStore } from '@/stores/folders'
+import FolderList from '@/components/ui/FolderList.vue'
 
 interface NavItem {
   title: string
@@ -124,7 +131,16 @@ const projectStore = useProjectStore()
 const router = useRouter()
 const route = useRoute()
 
+const folderStore = useFolderStore()
 const drawer = ref(true)
+
+// Fetch folders on layout mount
+import { onMounted } from 'vue'
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+    folderStore.fetchFolders().catch(() => {})
+  }
+})
 
 const navItems: NavItem[] = [
   { title: 'Dashboard', icon: 'mdi-view-dashboard-outline', to: '/dashboard' },
@@ -430,6 +446,14 @@ function handleLogout(): void {
   height: 20px;
   border-radius: 3px 0 0 3px;
   background: var(--ps-gradient-brand);
+}
+
+/* ── Folders ───────────────────────────────────────────────────────────── */
+
+.sidebar__folders {
+  padding: 4px 0;
+  border-top: 1px solid var(--ps-border);
+  margin-top: 4px;
 }
 
 /* ── Quick Stats ────────────────────────────────────────────────────────── */

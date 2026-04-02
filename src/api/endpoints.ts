@@ -9,12 +9,21 @@ export const ENDPOINTS = {
     UPDATE_ME: '/auth/me',
   },
 
+  FOLDERS: {
+    LIST: '/folders',
+    CREATE: '/folders',
+    DETAIL: (id: string) => `/folders/${id}`,
+    UPDATE: (id: string) => `/folders/${id}`,
+    DELETE: (id: string) => `/folders/${id}`,
+  },
+
   PROJECTS: {
     LIST: '/projects',
     DETAIL: (id: string) => `/projects/${id}`,
     CREATE: '/projects',
     UPDATE: (id: string) => `/projects/${id}`,
     DELETE: (id: string) => `/projects/${id}`,
+    BY_FOLDER: (folderId: string) => `/projects/folder/${folderId}`,
     BY_SHARE_ID: (shareId: string) => `/projects/share/${shareId}`,
   },
 

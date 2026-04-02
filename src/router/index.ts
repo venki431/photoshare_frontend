@@ -41,6 +41,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/projects/ProjectDetailView.vue'),
         props: true,
       },
+      {
+        path: '/folders/:id',
+        name: 'FolderProjects',
+        component: () => import('@/views/folders/FolderProjectsView.vue'),
+        props: true,
+      },
     ],
   },
   {

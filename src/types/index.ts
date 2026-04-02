@@ -1,5 +1,6 @@
 export type * from './api'
 export type * from './auth'
+export type * from './folder'
 export type * from './project'
 export type * from './photo'
 export type * from './selection'
