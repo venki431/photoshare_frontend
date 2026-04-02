@@ -32,6 +32,7 @@ export const ENDPOINTS = {
 
   PHOTOS: {
     LIST_BY_PROJECT: (projectId: string) => `/projects/${projectId}/photos`,
+    LIST_BY_SHARE: (shareId: string) => `/projects/share/${shareId}/photos`,
     SELECTED: (projectId: string) => `/projects/${projectId}/photos/selected`,
     SELECTED_DOWNLOAD: (projectId: string) => `/projects/${projectId}/photos/selected/download`,
     DETAIL: (id: string) => `/photos/${id}`,

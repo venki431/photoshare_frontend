@@ -136,17 +136,124 @@
               color="primary"
               size="large"
               class="text-none ps-btn-glow review-btn"
-              :to="`/gallery/${activeProject.shareId}/summary`"
+              @click="summaryOpen = true"
               elevation="0"
               rounded="lg"
             >
-              Review Selection
+              Review & Submit
               <v-icon end size="18">mdi-arrow-right</v-icon>
             </v-btn>
           </div>
         </div>
       </div>
     </transition>
+
+    <!-- Selection Summary Modal -->
+    <v-dialog v-model="summaryOpen" max-width="480" persistent>
+      <v-card rounded="xl" class="summary-dialog">
+        <!-- ── Success State ── -->
+        <template v-if="submitted">
+          <!-- Confetti -->
+          <div class="confetti-container">
+            <div v-for="n in 30" :key="n" class="confetti" :style="confettiStyle(n)" />
+          </div>
+
+          <v-card-text class="pa-8 text-center position-relative">
+            <div class="success-icon-wrap mb-5">
+              <div class="success-ring success-ring--1" />
+              <div class="success-ring success-ring--2" />
+              <v-icon size="44" color="white">mdi-check</v-icon>
+            </div>
+            <h2 class="text-h5 font-weight-bold mb-2">Selection Submitted!</h2>
+            <p class="text-body-2 text-medium-emphasis mb-1">
+              Your photographer has been notified and will begin
+              preparing your <strong class="text-high-emphasis">{{ submittedCount }}</strong> selected photos.
+            </p>
+            <p class="text-caption text-disabled mb-5">
+              <v-icon size="12" class="mr-1">mdi-lock-outline</v-icon>
+              Your selection is securely saved.
+            </p>
+            <v-btn
+              color="primary"
+              class="text-none"
+              rounded="lg"
+              size="large"
+              elevation="0"
+              block
+              @click="closeSummary"
+            >
+              Done
+            </v-btn>
+          </v-card-text>
+        </template>
+
+        <!-- ── Review State ── -->
+        <template v-else>
+          <v-card-text class="pa-6 pb-0 text-center">
+            <div class="summary-heart-icon mb-4">
+              <v-icon size="32" color="white">mdi-heart</v-icon>
+            </div>
+            <h2 class="text-h6 font-weight-bold mb-1">Selection Summary</h2>
+            <p class="text-body-2 text-medium-emphasis mb-5">
+              Review your selection before submitting
+            </p>
+
+            <!-- Stats -->
+            <div class="summary-stats mb-5">
+              <div class="summary-stat">
+                <span class="summary-stat__value">{{ images.length }}</span>
+                <span class="summary-stat__label">Total Photos</span>
+              </div>
+              <div class="summary-stat-divider" />
+              <div class="summary-stat">
+                <span class="summary-stat__value summary-stat__value--pink">{{ selectedImages.length }}</span>
+                <span class="summary-stat__label">Selected</span>
+              </div>
+            </div>
+
+            <!-- Warning -->
+            <v-alert
+              type="warning"
+              variant="tonal"
+              density="compact"
+              rounded="lg"
+              class="text-left mb-2"
+            >
+              <span class="text-body-2">
+                Once submitted, you will <strong>not</strong> be able to change or re-submit your selection.
+                Please make sure you're happy with your choices.
+              </span>
+            </v-alert>
+          </v-card-text>
+
+          <v-card-actions class="pa-5 pt-4 d-flex flex-column ga-2">
+            <v-btn
+              color="primary"
+              class="text-none ps-btn-glow"
+              :loading="submitting"
+              @click="handleSubmit"
+              elevation="0"
+              rounded="lg"
+              size="large"
+              block
+            >
+              <v-icon start size="18">mdi-check-circle-outline</v-icon>
+              Submit Selection
+            </v-btn>
+            <v-btn
+              variant="text"
+              color="grey-darken-1"
+              class="text-none"
+              size="large"
+              block
+              @click="summaryOpen = false"
+            >
+              Go Back & Edit
+            </v-btn>
+          </v-card-actions>
+        </template>
+      </v-card>
+    </v-dialog>
 
     <!-- Preview Modal -->
     <PreviewModal
@@ -159,7 +266,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, type CSSProperties } from 'vue'
 import { useRoute } from 'vue-router'
 import { folderService } from '@/api/services/folder.service'
 import { useProjectStore } from '@/stores/projects'
@@ -203,6 +310,10 @@ const loading = ref(true)
 const activeProjectId = ref<string>('')
 const modalOpen = ref(false)
 const modalImage = ref<PreviewImg | null>(null)
+const summaryOpen = ref(false)
+const submitting = ref(false)
+const submitted = ref(false)
+const submittedCount = ref(0)
 
 const activeProject = computed(() =>
   folder.value?.projects?.find(p => p.id === activeProjectId.value) ?? null
@@ -212,9 +323,11 @@ const images = computed<ProjectImage[]>(() =>
   projectStore.currentProject?.images ?? []
 )
 
-const selectedTotal = computed(() =>
-  images.value.filter(i => i.selected).length
+const selectedImages = computed(() =>
+  images.value.filter(i => i.selected)
 )
+
+const selectedTotal = computed(() => selectedImages.value.length)
 
 const previewImages = computed<PreviewImg[]>(() =>
   images.value.map(i => ({
@@ -250,6 +363,43 @@ async function selectProject(proj: SharedProject): Promise<void> {
 function toggleSelect(imageId: string): void {
   const proj = activeProject.value
   if (proj?.shareId) projectStore.toggleImageSelection(proj.shareId, imageId)
+}
+
+async function handleSubmit(): Promise<void> {
+  const sid = activeProject.value?.shareId
+  if (!sid) return
+  submitting.value = true
+  try {
+    submittedCount.value = selectedImages.value.length
+    await projectStore.submitSelections(sid)
+    submitted.value = true
+  } finally {
+    submitting.value = false
+  }
+}
+
+function closeSummary(): void {
+  summaryOpen.value = false
+  submitted.value = false
+}
+
+const confettiColors = ['#4F46E5', '#0EA5E9', '#EC4899', '#F59E0B', '#10B981', '#8B5CF6']
+
+function confettiStyle(n: number): CSSProperties {
+  const color = confettiColors[n % confettiColors.length]
+  const left = Math.random() * 100
+  const delay = Math.random() * 2
+  const duration = 2 + Math.random() * 2
+  const size = 4 + Math.random() * 6
+  return {
+    left: `${left}%`,
+    width: `${size}px`,
+    height: `${size}px`,
+    background: color,
+    animationDelay: `${delay}s`,
+    animationDuration: `${duration}s`,
+    borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+  }
 }
 
 function openModal(image: ProjectImage, idx: number): void {
@@ -591,4 +741,94 @@ watch(activeProjectId, () => {
   .review-btn { width: 100%; }
   .project-tabs { gap: 6px; }
 }
+
+/* ─── Summary Modal ──────────────────────────────────────────────────── */
+
+.summary-dialog { overflow: hidden; position: relative; }
+
+.summary-heart-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(135deg, #EC4899, #DB2777);
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 24px rgba(236, 72, 153, 0.3);
+}
+
+.summary-stats {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; background: #F8FAFC; border-radius: 16px; padding: 20px 0;
+  border: 1px solid #F1F5F9;
+}
+
+.summary-stat {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+
+.summary-stat__value {
+  font-size: 32px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;
+}
+
+.summary-stat__value--pink { color: #EC4899; }
+
+.summary-stat__label {
+  font-size: 12px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+.summary-stat-divider {
+  width: 1px; height: 40px; background: #E2E8F0;
+}
+
+/* ─── Success State ──────────────────────────────────────────────────── */
+
+.success-icon-wrap {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: linear-gradient(135deg, #10B981, #059669);
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.3);
+  position: relative;
+  animation: success-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.success-ring {
+  position: absolute; border-radius: 50%;
+  border: 2px solid rgba(16, 185, 129, 0.15);
+}
+
+.success-ring--1 {
+  inset: -12px;
+  animation: ring-pulse 2.5s ease-in-out infinite;
+}
+
+.success-ring--2 {
+  inset: -26px;
+  animation: ring-pulse 2.5s ease-in-out infinite 0.5s;
+  border-color: rgba(16, 185, 129, 0.08);
+}
+
+@keyframes success-pop {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+@keyframes ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.3; }
+}
+
+/* ─── Confetti ───────────────────────────────────────────────────────── */
+
+.confetti-container {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1;
+}
+
+.confetti {
+  position: absolute; top: -20px; opacity: 0;
+  animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(500px) rotate(720deg); opacity: 0; }
+}
+
+.position-relative { position: relative; z-index: 2; }
 </style>

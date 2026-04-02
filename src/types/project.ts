@@ -42,6 +42,7 @@ export interface CreateProjectPayload {
   clientName?: string
   clientEmail?: string
   clientMobile?: string
+  coverImage?: string
   notes?: string
 }
 

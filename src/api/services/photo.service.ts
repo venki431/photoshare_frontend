@@ -27,6 +27,13 @@ export const photoService = {
     )
   },
 
+  async getPhotosByShareId(shareId: string, params: PaginationParams = {}): Promise<ApiResponse<Photo[]>> {
+    if (USE_MOCK) return photoMock.getPhotosByProject(shareId, params)
+    return safeCall(() =>
+      apiClient.get<Photo[]>(ENDPOINTS.PHOTOS.LIST_BY_SHARE(shareId), { params: params as Record<string, number> })
+    )
+  },
+
   async getPhoto(id: string): Promise<ApiResponse<Photo>> {
     if (USE_MOCK) return photoMock.getPhoto(id)
     return safeCall(() => apiClient.get<Photo>(ENDPOINTS.PHOTOS.DETAIL(id)))

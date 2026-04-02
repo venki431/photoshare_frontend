@@ -340,6 +340,7 @@ async function handleCreate(): Promise<void> {
       clientName: createForm.clientName.trim(),
       clientMobile: createForm.clientMobile.trim(),
       clientEmail: createForm.clientEmail?.trim() || undefined,
+      coverImage: createForm.clientImage ?? undefined,
     })
     folderStore.incrementFolderProjectCount(props.id)
     resetAndClose()
@@ -355,7 +356,7 @@ function resetAndClose(): void {
   createDialog.value = false
   Object.assign(createForm, {
     name: '', eventType: '', clientName: '', clientEmail: '', clientMobile: '',
-    clientImage: null, clientImagePreview: null,
+    coverImage: null, clientImagePreview: null,
   })
   if (fileInput.value) fileInput.value.value = ''
 }
@@ -500,7 +501,7 @@ watch(() => props.id, () => {
 .toggle-btn--active { background: rgba(79, 70, 229, 0.06); color: var(--ps-primary); }
 
 /* Grid */
-.projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.projects-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
 /* List */
 .project-list { display: flex; flex-direction: column; background: white; border-radius: var(--ps-radius-xl); border: 1px solid var(--ps-border); overflow: hidden; }

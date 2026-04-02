@@ -59,13 +59,19 @@
         class="text-none"
         size="default"
         rounded="lg"
-        prepend-icon="mdi-download"
-        :loading="downloading"
-        @click="downloadSelectedNames"
+        prepend-icon="mdi-content-copy"
+        :loading="loadingSelected"
+        @click="openCopyDialog"
       >
         Download Selected ({{ projectStore.currentProject.selectedCount }})
       </v-btn>
     </div>
+
+    <!-- Copy Selected Dialog -->
+    <CopySelectedDialog
+      v-model="copyDialogOpen"
+      :file-names="selectedFileNames"
+    />
 
     <!-- Upload Zone (hide during compression only) -->
     <UploadZone v-if="canAcceptFiles  && projectStore?.currentProject?.status !== 'completed'" @files="handleFiles" />
@@ -143,6 +149,7 @@ import UploadProgress from '@/components/upload/UploadProgress.vue'
 import ImageGrid from '@/components/gallery/ImageGrid.vue'
 import PreviewModal from '@/components/gallery/PreviewModal.vue'
 import ShareDialog from '@/components/gallery/ShareDialog.vue'
+import CopySelectedDialog from '@/components/gallery/CopySelectedDialog.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import Breadcrumb from '@/components/navigation/Breadcrumb.vue'
 
@@ -187,7 +194,9 @@ const breadcrumbItems = computed(() => {
   return items
 })
 
-const downloading = ref<boolean>(false)
+const loadingSelected = ref<boolean>(false)
+const copyDialogOpen = ref<boolean>(false)
+const selectedFileNames = ref<string[]>([])
 const deleteProjectDialog = ref<boolean>(false)
 const deletingProject = ref<boolean>(false)
 const projectShareId = ref<string>('')
@@ -219,15 +228,18 @@ async function handleDeleteProject(): Promise<void> {
   }
 }
 
-async function downloadSelectedNames(): Promise<void> {
-  downloading.value = true
+async function openCopyDialog(): Promise<void> {
+  loadingSelected.value = true
   try {
-    await photoService.downloadSelectedNames(projectId)
-    showSnackbar('Download started')
+    const res = await photoService.getSelectedPhotos(projectId)
+    selectedFileNames.value = (res.data?.photos ?? [])
+      .map(p => p.originalFileName)
+      .filter(Boolean)
+    copyDialogOpen.value = true
   } catch {
-    showSnackbar('Failed to download', 'error')
+    showSnackbar('Failed to load selected photos', 'error')
   } finally {
-    downloading.value = false
+    loadingSelected.value = false
   }
 }
 

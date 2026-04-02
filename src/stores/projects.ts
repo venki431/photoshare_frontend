@@ -130,7 +130,7 @@ export const useProjectStore = defineStore('projects', () => {
       const selectedIds = new Set(selection.selectedIds ?? [])
       const comments = selection.comments ?? {}
 
-      const photosRes = await photoService.getPhotosByProject(projectData.id, { page: 1, perPage: 10 })
+      const photosRes = await photoService.getPhotosByShareId(shareId, { page: 1, perPage: 10 })
       if (photosRes.meta) photoPagination.value = photosRes.meta
 
       const project: ProjectWithImages = {
@@ -174,7 +174,7 @@ export const useProjectStore = defineStore('projects', () => {
     loadingMore.value = true
     try {
       const [photosRes, selRes] = await Promise.all([
-        photoService.getPhotosByProject(projectId, {
+        photoService.getPhotosByShareId(shareId, {
           page: photoPagination.value.page + 1,
           perPage: photoPagination.value.perPage,
         }),

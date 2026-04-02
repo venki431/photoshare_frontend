@@ -69,20 +69,6 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
-    path: '/gallery/:shareId/summary',
-    name: 'SelectionSummary',
-    component: () => import('@/views/client/SelectionSummaryView.vue'),
-    meta: { layout: 'client' },
-    props: true,
-  },
-  {
-    path: '/gallery/:shareId/success',
-    name: 'SelectionSuccess',
-    component: () => import('@/views/client/SelectionSuccessView.vue'),
-    meta: { layout: 'client' },
-    props: true,
-  },
-  {
     path: '/terms',
     name: 'Terms',
     component: () => import('@/views/legal/TermsView.vue'),
