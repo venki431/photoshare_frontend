@@ -33,4 +33,16 @@ export const folderService = {
   async deleteFolder(id: string): Promise<ApiResponse<null>> {
     return safeCall(() => apiClient.delete<null>(ENDPOINTS.FOLDERS.DELETE(id)))
   },
+
+  async shareFolder(id: string): Promise<ApiResponse<Folder>> {
+    return safeCall(() => apiClient.post<Folder>(ENDPOINTS.FOLDERS.SHARE(id)))
+  },
+
+  async unshareFolder(id: string): Promise<ApiResponse<Folder>> {
+    return safeCall(() => apiClient.delete<Folder>(ENDPOINTS.FOLDERS.UNSHARE(id)))
+  },
+
+  async getFolderByShareId(shareId: string): Promise<ApiResponse<Folder & { projects: unknown[] }>> {
+    return safeCall(() => apiClient.get<Folder & { projects: unknown[] }>(ENDPOINTS.FOLDERS.BY_SHARE_ID(shareId)))
+  },
 }

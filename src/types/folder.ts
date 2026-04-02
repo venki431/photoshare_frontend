@@ -3,6 +3,8 @@ export interface Folder {
   name: string
   userId: string
   projectCount: number
+  shareId: string | null
+  sharedAt: string | null
   createdAt: string
   updatedAt: string
 }

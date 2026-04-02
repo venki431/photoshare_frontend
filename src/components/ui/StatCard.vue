@@ -43,19 +43,19 @@ defineProps<{
 <style scoped>
 .stat-card {
   position: relative;
-  border-radius: var(--ps-radius-xl);
+  border-radius: var(--ps-radius-md);
   background: white;
   border: 1px solid var(--ps-border);
-  padding: 24px;
+  padding: 20px;
   overflow: hidden;
   transition: all var(--ps-duration-normal) var(--ps-ease-smooth);
   cursor: default;
 }
 
 .stat-card:hover {
-  border-color: transparent;
-  transform: translateY(-4px);
-  box-shadow: var(--ps-shadow-card-hover);
+  border-color: var(--ps-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--ps-shadow-md);
 }
 
 .stat-card__bg {
@@ -107,7 +107,7 @@ defineProps<{
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .stat-card__header {
@@ -117,9 +117,9 @@ defineProps<{
 }
 
 .stat-card__icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -142,8 +142,8 @@ defineProps<{
 }
 
 .stat-card__value {
-  font-size: clamp(28px, 3.5vw, 36px);
-  font-weight: 800;
+  font-size: clamp(24px, 3vw, 30px);
+  font-weight: 700;
   line-height: 1;
   color: #0F172A;
   letter-spacing: -0.02em;

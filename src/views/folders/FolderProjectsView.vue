@@ -1,14 +1,14 @@
 <template>
   <div class="folder-projects-page">
     <!-- Breadcrumb -->
-    <nav class="breadcrumb ps-animate-in">
-      <router-link to="/projects" class="breadcrumb__link">
-        <v-icon size="16">mdi-folder-multiple-outline</v-icon>
-        Folders
-      </router-link>
-      <v-icon size="14" class="breadcrumb__sep">mdi-chevron-right</v-icon>
-      <span class="breadcrumb__current">{{ folder?.name ?? 'Loading...' }}</span>
-    </nav>
+    <Breadcrumb
+      class="ps-animate-in"
+      :items="[
+        { label: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard-outline' },
+        { label: 'Folders', to: '/folders', icon: 'mdi-folder-outline' },
+        { label: folder?.name ?? 'Loading...' },
+      ]"
+    />
 
     <!-- Header -->
     <div class="page-header ps-animate-in">
@@ -21,18 +21,51 @@
         </p>
       </div>
 
-      <v-btn
-        color="primary"
-        prepend-icon="mdi-plus"
-        class="text-none ps-btn-glow"
-        elevation="0"
-        size="large"
-        rounded="lg"
-        @click="createDialog = true"
-      >
-        New Project
-      </v-btn>
+      <div class="page-header__actions">
+        <v-btn
+          v-if="folder?.shareId"
+          variant="outlined"
+          color="primary"
+          class="text-none"
+          size="large"
+          rounded="lg"
+          prepend-icon="mdi-link-variant"
+          @click="copyShareLink"
+        >
+          Copy Link
+        </v-btn>
+        <v-btn
+          v-else
+          variant="outlined"
+          color="primary"
+          class="text-none"
+          size="large"
+          rounded="lg"
+          prepend-icon="mdi-share-variant-outline"
+          :loading="sharing"
+          @click="handleShare"
+        >
+          Share Folder
+        </v-btn>
+        <v-btn
+          color="primary"
+          prepend-icon="mdi-plus"
+          class="text-none ps-btn-glow"
+          elevation="0"
+          size="large"
+          rounded="lg"
+          @click="createDialog = true"
+        >
+          New Project
+        </v-btn>
+      </div>
     </div>
+
+    <!-- Share snackbar -->
+    <v-snackbar v-model="shareSnackbar" :timeout="3000" color="success" location="bottom">
+      <v-icon start size="18">mdi-check-circle</v-icon>
+      {{ shareSnackbarText }}
+    </v-snackbar>
 
     <!-- Create Project Dialog -->
     <v-dialog v-model="createDialog" max-width="580" persistent>
@@ -200,6 +233,7 @@ import type { Project } from '@/types'
 import ProjectCard from '@/components/ui/ProjectCard.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import Breadcrumb from '@/components/navigation/Breadcrumb.vue'
 
 interface VFormInstance {
   validate: () => Promise<{ valid: boolean }>
@@ -324,6 +358,37 @@ function resetAndClose(): void {
   if (fileInput.value) fileInput.value.value = ''
 }
 
+// Folder sharing
+const sharing = ref(false)
+const shareSnackbar = ref(false)
+const shareSnackbarText = ref('')
+
+async function handleShare(): Promise<void> {
+  sharing.value = true
+  try {
+    const updated = await folderStore.shareFolder(props.id)
+    if (updated.shareId) {
+      const link = `${window.location.origin}/gallery/folder/${updated.shareId}`
+      await navigator.clipboard.writeText(link)
+      shareSnackbarText.value = 'Share link copied to clipboard!'
+      shareSnackbar.value = true
+    }
+  } catch {
+    shareSnackbarText.value = 'Failed to share folder'
+    shareSnackbar.value = true
+  } finally {
+    sharing.value = false
+  }
+}
+
+async function copyShareLink(): Promise<void> {
+  if (!folder.value?.shareId) return
+  const link = `${window.location.origin}/gallery/folder/${folder.value.shareId}`
+  await navigator.clipboard.writeText(link)
+  shareSnackbarText.value = 'Share link copied!'
+  shareSnackbar.value = true
+}
+
 function clearFilters(): void {
   search.value = ''
   statusFilter.value = 'all'
@@ -368,38 +433,6 @@ watch(() => props.id, () => {
 </script>
 
 <style scoped>
-/* Breadcrumb */
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  margin-bottom: 8px;
-}
-
-.breadcrumb__link {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: #64748B;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.15s ease;
-}
-
-.breadcrumb__link:hover {
-  color: var(--ps-primary);
-}
-
-.breadcrumb__sep {
-  color: #CBD5E1;
-}
-
-.breadcrumb__current {
-  color: #0F172A;
-  font-weight: 600;
-}
-
 /* Reuse styles from ProjectsListView */
 .folder-projects-page {
   display: flex;
@@ -409,6 +442,7 @@ watch(() => props.id, () => {
 }
 
 .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.page-header__actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .page-title { font-size: clamp(24px, 3vw, 32px); font-weight: 800; color: #0F172A; margin: 0; letter-spacing: -0.02em; }
 .page-subtitle { font-size: 14px; color: #94A3B8; margin: 4px 0 0; }
 

@@ -113,6 +113,14 @@
         </div>
       </div>
 
+      <!-- Infinite scroll sentinel -->
+      <div v-if="filter === 'all'" ref="sentinelRef" class="infinite-sentinel">
+        <div v-if="isLoading" class="loading-more">
+          <v-progress-circular indeterminate size="28" width="3" color="primary" />
+          <span class="loading-more__text">Loading more photos...</span>
+        </div>
+      </div>
+
       <!-- Empty selected filter -->
       <div v-if="filter === 'selected' && selectedCount === 0" class="empty-favorites ps-animate-in">
         <div class="empty-fav-icon">
@@ -182,6 +190,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
+import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
 import PreviewModal from '@/components/gallery/PreviewModal.vue'
 import type { ProjectImage } from '@/types'
 
@@ -201,6 +210,13 @@ const project = computed(() => projectStore.getProjectByShareId(shareId.value) ?
 
 onMounted(() => {
   projectStore.fetchProjectByShareId(shareId.value).catch(() => {})
+})
+
+// Infinite scroll for loading more photos
+const { sentinelRef, isLoading } = useInfiniteScroll(async () => {
+  if (projectStore.hasMorePhotos && project.value?.id) {
+    await projectStore.fetchMorePhotosForGallery(project.value.id, shareId.value)
+  }
 })
 
 const filter = ref<'all' | 'selected'>('all')
@@ -496,6 +512,27 @@ function openModal(image: ProjectImage, idx: number): void {
   background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
   background-size: 200% 100%;
   animation: ps-shimmer 1.5s ease-in-out infinite;
+}
+
+/* ─── Infinite Scroll ────────────────────────────────────────────────── */
+
+.infinite-sentinel {
+  min-height: 1px;
+  padding: 8px 0;
+}
+
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 0;
+}
+
+.loading-more__text {
+  font-size: 14px;
+  color: #94A3B8;
+  font-weight: 500;
 }
 
 /* ─── Overlay ─────────────────────────────────────────────────────────── */

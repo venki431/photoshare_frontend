@@ -1,90 +1,107 @@
 <template>
   <div class="dashboard-page">
-    <!-- Hero Welcome Section -->
-    <div class="welcome-section ps-animate-in">
-      <div class="welcome-content">
-        <div class="welcome-text">
-          <div class="welcome-badge">
-            <v-icon size="14">mdi-hand-wave</v-icon>
-            <span>{{ greeting }} greeting</span>
-          </div>
-          <h1 class="welcome-title">
-            Welcome back, <span class="ps-text-gradient">{{ firstName }}</span>
-          </h1>
-          <p class="welcome-subtitle">
-            Here's what's happening with your photography studio today.
-            Stay on top of your projects and client selections.
-          </p>
-        </div>
-        <v-btn
-          color="primary"
-          prepend-icon="mdi-plus"
-          size="large"
-          class="text-none ps-btn-glow new-project-btn"
-          to="/projects"
-          elevation="0"
-          rounded="lg"
-        >
-          New Project
-        </v-btn>
+    <!-- Welcome Strip -->
+    <div class="welcome-strip ps-animate-in">
+      <div class="welcome-strip__left">
+        <h1 class="welcome-title">
+          {{ greeting }}, <span class="ps-text-gradient">{{ firstName }}</span>
+        </h1>
+        <p class="welcome-subtitle">
+          Here's what's happening with your studio today.
+        </p>
       </div>
-
-      <!-- Decorative elements -->
-      <div class="welcome-orb welcome-orb--1" />
-      <div class="welcome-orb welcome-orb--2" />
+      <v-btn
+        color="primary"
+        prepend-icon="mdi-folder-plus-outline"
+        size="large"
+        class="text-none ps-btn-glow create-folder-btn"
+        to="/folders"
+        elevation="0"
+        rounded="lg"
+      >
+        Create Folder
+      </v-btn>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="stats-grid ps-stagger">
-      <StatCard
-        v-for="stat in stats"
-        :key="stat.title"
-        v-bind="stat"
-      />
+    <!-- Stat Strip -->
+    <div class="stat-strip ps-animate-in ps-animate-in-delay-1">
+      <div class="stat-strip__item" v-for="stat in stats" :key="stat.label">
+        <span class="stat-strip__value">{{ stat.value }}</span>
+        <span class="stat-strip__label">{{ stat.label }}</span>
+      </div>
     </div>
 
-    <!-- Recent Projects Section -->
-    <div class="recent-section ps-animate-in ps-animate-in-delay-3">
+    <!-- Folders Section -->
+    <div class="section ps-animate-in ps-animate-in-delay-2">
       <div class="section-header">
-        <div class="section-header__left">
-          <h2 class="section-title">Recent Projects</h2>
-          <p class="section-subtitle" v-if="recentProjects.length">
-            Your latest {{ recentProjects.length }} project{{ recentProjects.length !== 1 ? 's' : '' }}
-          </p>
-        </div>
+        <h2 class="section-title">Your Folders</h2>
         <v-btn
-          v-if="recentProjects.length"
+          v-if="folderStore.folders.length"
           variant="text"
           color="primary"
           size="small"
           class="text-none view-all-btn"
           append-icon="mdi-arrow-right"
-          to="/projects"
+          to="/folders"
         >
-          View all projects
+          View all
         </v-btn>
       </div>
 
-      <template v-if="recentProjects.length > 0">
-        <div class="projects-grid ps-stagger">
-          <ProjectCard
-            v-for="project in recentProjects"
-            :key="project.id"
-            :project="project"
-          />
+      <!-- Loading -->
+      <div v-if="folderStore.loading && !folderStore.folders.length" class="folders-grid">
+        <div v-for="n in 4" :key="n" class="folder-skeleton">
+          <div class="ps-shimmer" style="width: 52px; height: 52px; border-radius: 12px; flex-shrink: 0" />
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+            <div class="ps-shimmer" style="width: 60%; height: 14px; border-radius: 6px" />
+            <div class="ps-shimmer" style="width: 30%; height: 12px; border-radius: 6px" />
+          </div>
         </div>
-      </template>
+      </div>
 
-      <!-- Premium Empty State -->
+      <!-- Folder Cards -->
+      <div v-else-if="folderStore.folders.length" class="folders-grid ps-stagger">
+        <router-link
+          v-for="folder in displayedFolders"
+          :key="folder.id"
+          :to="`/folders/${folder.id}`"
+          class="folder-card"
+        >
+          <div class="folder-card__icon">
+            <v-icon size="28" color="white">mdi-folder</v-icon>
+          </div>
+          <div class="folder-card__body">
+            <h3 class="folder-card__name">{{ folder.name }}</h3>
+            <span class="folder-card__meta">
+              {{ folder.projectCount }} project{{ folder.projectCount !== 1 ? 's' : '' }}
+            </span>
+          </div>
+          <v-icon size="16" class="folder-card__arrow">mdi-chevron-right</v-icon>
+        </router-link>
+
+        <!-- Create Folder Card -->
+        <router-link to="/folders" class="folder-card folder-card--create">
+          <div class="folder-card__icon folder-card__icon--create">
+            <v-icon size="24">mdi-plus</v-icon>
+          </div>
+          <div class="folder-card__body">
+            <h3 class="folder-card__name">New Folder</h3>
+            <span class="folder-card__meta">Create a folder</span>
+          </div>
+        </router-link>
+      </div>
+
+      <!-- Empty -->
       <EmptyState
         v-else
-        icon="mdi-camera-plus-outline"
-        title="No projects yet"
-        description="Create your first project to start sharing beautiful galleries with your clients. Upload photos, let them select favorites, and deliver stunning results."
+        icon="mdi-folder-plus-outline"
+        title="Create your first folder"
+        description="Folders help you organize projects by client, event type, or season."
+        compact
         :tips="[
-          'Drag & drop images for instant upload',
-          'Share galleries via a simple link',
-          'Clients can select their favorites easily'
+          'Group related projects together',
+          'Share an entire folder with clients',
+          'Keep your workspace organized'
         ]"
       >
         <template #action>
@@ -92,55 +109,67 @@
             color="primary"
             prepend-icon="mdi-plus"
             size="large"
-            to="/projects"
+            to="/folders"
             class="text-none ps-btn-glow"
             elevation="0"
             rounded="lg"
           >
-            Create Your First Project
+            Create Folder
           </v-btn>
         </template>
       </EmptyState>
     </div>
 
-    <!-- Quick Actions (when projects exist) -->
-    <div v-if="recentProjects.length" class="quick-actions ps-animate-in ps-animate-in-delay-4">
+    <!-- Recent Projects Section -->
+    <div v-if="recentProjects.length" class="section ps-animate-in ps-animate-in-delay-3">
       <div class="section-header">
-        <h2 class="section-title">Quick Actions</h2>
+        <h2 class="section-title">Recent Projects</h2>
+        <v-btn
+          variant="text"
+          color="primary"
+          size="small"
+          class="text-none view-all-btn"
+          append-icon="mdi-arrow-right"
+          to="/projects"
+        >
+          View all
+        </v-btn>
       </div>
+
+      <div class="projects-grid ps-stagger">
+        <ProjectCard
+          v-for="project in recentProjects"
+          :key="project.id"
+          :project="project"
+        />
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div v-if="recentProjects.length" class="section ps-animate-in ps-animate-in-delay-4">
+      <h2 class="section-title">Quick Actions</h2>
       <div class="actions-grid">
-        <router-link to="/projects" class="action-card">
+        <router-link to="/folders" class="action-card">
           <div class="action-card__icon action-card__icon--purple">
-            <v-icon size="22" color="white">mdi-plus-circle-outline</v-icon>
+            <v-icon size="20" color="white">mdi-folder-plus-outline</v-icon>
           </div>
           <div class="action-card__text">
-            <div class="action-card__title">New Project</div>
-            <div class="action-card__desc">Create a new gallery</div>
+            <div class="action-card__title">New Folder</div>
+            <div class="action-card__desc">Organize your work</div>
           </div>
-          <v-icon size="18" class="action-card__arrow">mdi-arrow-right</v-icon>
+          <v-icon size="16" class="action-card__arrow">mdi-chevron-right</v-icon>
         </router-link>
 
         <router-link to="/projects" class="action-card">
           <div class="action-card__icon action-card__icon--blue">
-            <v-icon size="22" color="white">mdi-folder-multiple-outline</v-icon>
+            <v-icon size="20" color="white">mdi-folder-image</v-icon>
           </div>
           <div class="action-card__text">
             <div class="action-card__title">All Projects</div>
-            <div class="action-card__desc">Manage your galleries</div>
+            <div class="action-card__desc">Manage galleries</div>
           </div>
-          <v-icon size="18" class="action-card__arrow">mdi-arrow-right</v-icon>
+          <v-icon size="16" class="action-card__arrow">mdi-chevron-right</v-icon>
         </router-link>
-
-        <div class="action-card action-card--coming-soon">
-          <div class="action-card__icon action-card__icon--green">
-            <v-icon size="22" color="white">mdi-chart-line</v-icon>
-          </div>
-          <div class="action-card__text">
-            <div class="action-card__title">Analytics</div>
-            <div class="action-card__desc">Coming soon</div>
-          </div>
-          <v-chip size="x-small" variant="tonal" color="grey" class="ml-auto">Soon</v-chip>
-        </div>
       </div>
     </div>
   </div>
@@ -150,16 +179,20 @@
 import { computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectStore } from '@/stores/projects'
-import StatCard from '@/components/ui/StatCard.vue'
+import { useFolderStore } from '@/stores/folders'
 import ProjectCard from '@/components/ui/ProjectCard.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 
 const authStore = useAuthStore()
 const projectStore = useProjectStore()
+const folderStore = useFolderStore()
 
 onMounted(() => {
   if (projectStore.projects.length === 0) {
     projectStore.fetchProjects().catch(() => {})
+  }
+  if (folderStore.folders.length === 0) {
+    folderStore.fetchFolders().catch(() => {})
   }
 })
 
@@ -172,35 +205,14 @@ const greeting = computed(() => {
   return 'Good evening'
 })
 
+const displayedFolders = computed(() => folderStore.folders.slice(0, 5))
 const recentProjects = computed(() => projectStore.projects.slice(0, 3))
 
 const stats = computed(() => [
-  {
-    title: 'Total Projects',
-    value: projectStore.totalProjects,
-    icon: 'mdi-folder-image',
-    color: 'primary',
-  },
-  {
-    title: 'Pending Review',
-    value: projectStore.pendingCount,
-    icon: 'mdi-clock-outline',
-    color: 'warning',
-    chip: projectStore.pendingCount > 0 ? 'Action needed' : undefined,
-    chipColor: 'warning',
-  },
-  {
-    title: 'In Review',
-    value: projectStore.inReviewCount,
-    icon: 'mdi-eye-outline',
-    color: 'info',
-  },
-  {
-    title: 'Completed',
-    value: projectStore.completedCount,
-    icon: 'mdi-check-circle-outline',
-    color: 'success',
-  },
+  { label: 'Folders', value: folderStore.totalFolders },
+  { label: 'Projects', value: projectStore.totalProjects },
+  { label: 'Photos', value: projectStore.totalImages },
+  { label: 'Pending', value: projectStore.pendingCount },
 ])
 </script>
 
@@ -208,55 +220,22 @@ const stats = computed(() => [
 .dashboard-page {
   display: flex;
   flex-direction: column;
-  gap: clamp(28px, 4vw, 40px);
+  gap: clamp(24px, 3.5vw, 32px);
   min-width: 0;
   padding-bottom: 40px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   WELCOME SECTION
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ─── Welcome Strip ──────────────────────────────────────────────────── */
 
-.welcome-section {
-  position: relative;
-  padding: clamp(28px, 4vw, 40px);
-  border-radius: var(--ps-radius-2xl);
-  background: white;
-  border: 1px solid var(--ps-border);
-  overflow: hidden;
-}
-
-.welcome-content {
-  position: relative;
-  z-index: 1;
+.welcome-strip {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
-}
-
-.welcome-text {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 560px;
-}
-
-.welcome-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  border-radius: var(--ps-radius-full);
-  background: rgba(79, 70, 229, 0.06);
-  color: var(--ps-primary);
-  font-size: 13px;
-  font-weight: 600;
-  width: fit-content;
+  gap: 20px;
 }
 
 .welcome-title {
-  font-size: clamp(24px, 3vw, 32px);
+  font-size: clamp(22px, 3vw, 28px);
   font-weight: 800;
   color: #0F172A;
   line-height: 1.2;
@@ -265,83 +244,68 @@ const stats = computed(() => [
 }
 
 .welcome-subtitle {
-  font-size: 15px;
+  font-size: 14px;
   color: #64748B;
-  line-height: 1.6;
-  margin: 0;
+  margin: 6px 0 0;
 }
 
-.welcome-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-}
+/* ─── Stat Strip ─────────────────────────────────────────────────────── */
 
-.welcome-orb--1 {
-  width: 300px;
-  height: 300px;
-  background: rgba(79, 70, 229, 0.06);
-  top: -100px;
-  right: -60px;
-  animation: ps-float 12s ease-in-out infinite;
-}
-
-.welcome-orb--2 {
-  width: 200px;
-  height: 200px;
-  background: rgba(14, 165, 233, 0.05);
-  bottom: -80px;
-  left: 20%;
-  animation: ps-float 15s ease-in-out infinite 3s;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   STATS GRID
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-@media (max-width: 960px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 480px) {
-  .stats-grid { grid-template-columns: 1fr; }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   SECTION HEADER
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.section-header {
+.stat-strip {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
+  align-items: center;
+  gap: 0;
+  padding: 14px 0;
+  border-radius: var(--ps-radius-md);
+  background: white;
+  border: 1px solid var(--ps-border);
 }
 
-.section-header__left {
+.stat-strip__item {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 2px;
+  padding: 0 16px;
 }
 
-.section-title {
+.stat-strip__item + .stat-strip__item {
+  border-left: 1px solid var(--ps-border);
+}
+
+.stat-strip__value {
   font-size: 20px;
   font-weight: 700;
   color: #0F172A;
-  margin: 0;
+  line-height: 1;
 }
 
-.section-subtitle {
-  font-size: 14px;
+.stat-strip__label {
+  font-size: 12px;
+  font-weight: 500;
   color: #94A3B8;
+}
+
+/* ─── Section ────────────────────────────────────────────────────────── */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0F172A;
   margin: 0;
 }
 
@@ -349,50 +313,136 @@ const stats = computed(() => [
   font-weight: 600;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PROJECTS GRID
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ─── Folders Grid ───────────────────────────────────────────────────── */
 
-.projects-grid {
+.folders-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
 }
 
-@media (max-width: 960px) {
-  .projects-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 600px) {
-  .projects-grid { grid-template-columns: 1fr; }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   QUICK ACTIONS
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-@media (max-width: 768px) {
-  .actions-grid { grid-template-columns: 1fr; }
-}
-
-.action-card {
+.folder-card {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 18px 20px;
-  border-radius: var(--ps-radius-lg);
+  padding: 16px;
+  border-radius: var(--ps-radius-md);
   background: white;
   border: 1px solid var(--ps-border);
   text-decoration: none;
   color: inherit;
   transition: all var(--ps-duration-normal) var(--ps-ease-smooth);
-  cursor: pointer;
+}
+
+.folder-card:hover {
+  border-color: var(--ps-border-hover);
+  box-shadow: var(--ps-shadow-md);
+  transform: translateY(-2px);
+}
+
+.folder-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--ps-radius-md);
+  background: var(--ps-gradient-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(79, 70, 229, 0.18);
+  transition: transform var(--ps-duration-normal) var(--ps-ease-spring);
+}
+
+.folder-card:hover .folder-card__icon {
+  transform: scale(1.06);
+}
+
+.folder-card__icon--create {
+  background: white;
+  border: 2px dashed rgba(79, 70, 229, 0.3);
+  box-shadow: none;
+  color: var(--ps-primary);
+}
+
+.folder-card--create {
+  border-style: dashed;
+  border-color: rgba(79, 70, 229, 0.15);
+}
+
+.folder-card--create:hover {
+  border-color: rgba(79, 70, 229, 0.3);
+  background: rgba(79, 70, 229, 0.02);
+}
+
+.folder-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.folder-card__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1E293B;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-card__meta {
+  font-size: 12px;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.folder-card__arrow {
+  color: #CBD5E1;
+  flex-shrink: 0;
+  transition: all var(--ps-duration-fast);
+}
+
+.folder-card:hover .folder-card__arrow {
+  color: var(--ps-primary);
+  transform: translateX(2px);
+}
+
+.folder-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--ps-radius-md);
+  background: white;
+  border: 1px solid var(--ps-border);
+}
+
+/* ─── Projects Grid ──────────────────────────────────────────────────── */
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* ─── Quick Actions ──────────────────────────────────────────────────── */
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--ps-radius-md);
+  background: white;
+  border: 1px solid var(--ps-border);
+  text-decoration: none;
+  color: inherit;
+  transition: all var(--ps-duration-normal) var(--ps-ease-smooth);
 }
 
 .action-card:hover {
@@ -401,15 +451,10 @@ const stats = computed(() => [
   transform: translateY(-2px);
 }
 
-.action-card--coming-soon {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
 .action-card__icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -418,7 +463,6 @@ const stats = computed(() => [
 
 .action-card__icon--purple { background: var(--ps-gradient-brand); }
 .action-card__icon--blue { background: linear-gradient(135deg, #3B82F6, #60A5FA); }
-.action-card__icon--green { background: var(--ps-gradient-success); }
 
 .action-card__text {
   flex: 1;
@@ -446,22 +490,45 @@ const stats = computed(() => [
   transform: translateX(2px);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ─── Responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 960px) {
+  .projects-grid { grid-template-columns: repeat(2, 1fr); }
+}
 
 @media (max-width: 600px) {
-  .welcome-content {
+  .welcome-strip {
     flex-direction: column;
+    align-items: stretch;
   }
 
-  .new-project-btn {
+  .create-folder-btn {
     width: 100%;
   }
 
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .stat-strip {
+    flex-wrap: wrap;
   }
+
+  .stat-strip__item {
+    flex: 0 0 50%;
+    padding: 8px 0;
+  }
+
+  .stat-strip__item + .stat-strip__item {
+    border-left: none;
+  }
+
+  .stat-strip__item:nth-child(odd) {
+    border-right: 1px solid var(--ps-border);
+  }
+
+  .stat-strip__item:nth-child(n+3) {
+    border-top: 1px solid var(--ps-border);
+  }
+
+  .projects-grid { grid-template-columns: 1fr; }
+  .actions-grid { grid-template-columns: 1fr; }
+  .folders-grid { grid-template-columns: 1fr; }
 }
 </style>

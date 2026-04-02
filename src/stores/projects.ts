@@ -168,6 +168,40 @@ export const useProjectStore = defineStore('projects', () => {
     }
   }
 
+  async function fetchMorePhotosForGallery(projectId: string, shareId: string): Promise<void> {
+    if (!hasMorePhotos.value || loadingMore.value) return
+    loadingMore.value = true
+    try {
+      const [photosRes, selRes] = await Promise.all([
+        photoService.getPhotosByProject(projectId, {
+          page: photoPagination.value.page + 1,
+          perPage: photoPagination.value.perPage,
+        }),
+        selectionService.getSelection(shareId).catch(() => ({
+          success: true as const,
+          data: { shareId, projectId: '', selectedIds: [] as string[], comments: {} as Record<string, string>, status: 'draft' as const, submittedAt: null },
+          message: '',
+        })),
+      ])
+      if (photosRes.meta) photoPagination.value = photosRes.meta
+      if (currentProject.value?.id === projectId && currentProject.value.images) {
+        const selectedIds = new Set(selRes.data?.selectedIds ?? [])
+        const comments = selRes.data?.comments ?? {}
+        const newImages = (photosRes.data ?? []).map(p => ({
+          ...p,
+          selected: selectedIds.has(p.id),
+          comment: comments[p.id] ?? '',
+        })) as ProjectImage[]
+        currentProject.value.images = [...currentProject.value.images, ...newImages]
+      }
+    } catch (err: unknown) {
+      error.value = (err as { message?: string })?.message ?? 'Failed to load more photos'
+      throw err
+    } finally {
+      loadingMore.value = false
+    }
+  }
+
   function getProject(id: string): ProjectWithImages | Project | null {
     if (currentProject.value?.id === id) return currentProject.value
     return projects.value.find(p => p.id === id) ?? null
@@ -308,7 +342,7 @@ export const useProjectStore = defineStore('projects', () => {
     projects, loading, loadingMore, error, currentProject, pagination, photoPagination,
     totalProjects, pendingCount, completedCount, inReviewCount, totalImages,
     hasMoreProjects, hasMorePhotos,
-    fetchProjects, fetchMoreProjects, fetchProject, fetchMorePhotos, fetchProjectByShareId,
+    fetchProjects, fetchMoreProjects, fetchProject, fetchMorePhotos, fetchMorePhotosForGallery, fetchProjectByShareId,
     getProject, getProjectByShareId,
     createProject, updateProject, deleteProject,
     uploadPhoto, deletePhoto, bulkDeletePhotos,

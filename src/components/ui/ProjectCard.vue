@@ -3,7 +3,7 @@
     <div class="project-card">
       <!-- Cover Image -->
       <div class="project-card__cover">
-        <v-img :src="project.coverImage" height="200" cover class="project-card__img">
+        <v-img :src="project.coverImage" height="160" cover class="project-card__img">
           <template #placeholder>
             <div class="project-card__placeholder">
               <v-icon size="48" color="grey-lighten-1">mdi-image-outline</v-icon>
@@ -87,7 +87,7 @@ function formatDate(dateStr: string): string {
   height: 100%;
   display: flex;
   flex-direction: column;
-  border-radius: var(--ps-radius-xl);
+  border-radius: var(--ps-radius-md);
   background: white;
   border: 1px solid var(--ps-border);
   overflow: hidden;
@@ -95,9 +95,9 @@ function formatDate(dateStr: string): string {
 }
 
 .project-card:hover {
-  transform: translateY(-6px);
-  border-color: transparent;
-  box-shadow: var(--ps-shadow-card-hover);
+  transform: translateY(-2px);
+  border-color: var(--ps-border-hover);
+  box-shadow: var(--ps-shadow-md);
 }
 
 .project-card__cover {
@@ -114,7 +114,7 @@ function formatDate(dateStr: string): string {
 }
 
 .project-card__placeholder {
-  height: 200px;
+  height: 160px;
   background: linear-gradient(135deg, #F1F5F9, #E2E8F0);
   display: flex;
   align-items: center;
@@ -166,8 +166,8 @@ function formatDate(dateStr: string): string {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 20px;
+  gap: 10px;
+  padding: 16px;
 }
 
 .project-card__title {

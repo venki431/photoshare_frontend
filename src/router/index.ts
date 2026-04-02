@@ -31,6 +31,17 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/dashboard/DashboardView.vue'),
       },
       {
+        path: '/folders',
+        name: 'Folders',
+        component: () => import('@/views/folders/FoldersListView.vue'),
+      },
+      {
+        path: '/folders/:id',
+        name: 'FolderProjects',
+        component: () => import('@/views/folders/FolderProjectsView.vue'),
+        props: true,
+      },
+      {
         path: '/projects',
         name: 'Projects',
         component: () => import('@/views/projects/ProjectsListView.vue'),
@@ -41,13 +52,14 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/projects/ProjectDetailView.vue'),
         props: true,
       },
-      {
-        path: '/folders/:id',
-        name: 'FolderProjects',
-        component: () => import('@/views/folders/FolderProjectsView.vue'),
-        props: true,
-      },
     ],
+  },
+  {
+    path: '/gallery/folder/:shareId',
+    name: 'ClientFolderGallery',
+    component: () => import('@/views/client/ClientFolderGalleryView.vue'),
+    meta: { layout: 'client' },
+    props: true,
   },
   {
     path: '/gallery/:shareId',

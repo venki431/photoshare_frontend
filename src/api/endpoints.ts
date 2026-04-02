@@ -15,6 +15,9 @@ export const ENDPOINTS = {
     DETAIL: (id: string) => `/folders/${id}`,
     UPDATE: (id: string) => `/folders/${id}`,
     DELETE: (id: string) => `/folders/${id}`,
+    SHARE: (id: string) => `/folders/${id}/share`,
+    UNSHARE: (id: string) => `/folders/${id}/share`,
+    BY_SHARE_ID: (shareId: string) => `/folders/share/${shareId}`,
   },
 
   PROJECTS: {

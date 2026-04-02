@@ -46,7 +46,7 @@
   --ps-shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.03);
   --ps-shadow-xl: 0 20px 50px -12px rgba(0, 0, 0, 0.12);
   --ps-shadow-glow: 0 0 40px rgba(79, 70, 229, 0.15);
-  --ps-shadow-card-hover: 0 20px 40px -8px rgba(79, 70, 229, 0.12), 0 8px 16px rgba(0, 0, 0, 0.04);
+  --ps-shadow-card-hover: 0 8px 24px -4px rgba(79, 70, 229, 0.1), 0 4px 8px rgba(0, 0, 0, 0.03);
 
   /* ── Radius ─────────────────────────────────────────────────────────────── */
   --ps-radius-sm: 8px;
@@ -180,8 +180,8 @@ body {
 
 .ps-surface-elevated:hover {
   border-color: var(--ps-border-hover);
-  box-shadow: var(--ps-shadow-card-hover);
-  transform: translateY(-2px);
+  box-shadow: var(--ps-shadow-md);
+  transform: translateY(-1px);
 }
 
 .ps-gradient-border {
@@ -217,7 +217,7 @@ body {
 @keyframes ps-fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -345,7 +345,7 @@ body {
 
 .ps-btn-glow:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.22);
 }
 
 .ps-btn-glow:active {
@@ -441,10 +441,10 @@ body {
 }
 
 .page-enter-active {
-  animation: ps-fade-in-up 0.4s var(--ps-ease-out) both;
+  animation: ps-fade-in-up 0.3s var(--ps-ease-out) both;
 }
 .page-leave-active {
-  animation: ps-fade-in 0.15s ease reverse both;
+  animation: ps-fade-in 0.12s ease reverse both;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

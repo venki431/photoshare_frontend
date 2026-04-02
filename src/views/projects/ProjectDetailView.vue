@@ -1,11 +1,13 @@
 <template>
   <div class="project-detail ps-animate-in">
+    <!-- Breadcrumb -->
+    <Breadcrumb
+      v-if="projectStore.currentProject"
+      :items="breadcrumbItems"
+    />
+
     <!-- Project Header -->
     <div class="project-header" v-if="projectStore.currentProject">
-      <button class="back-btn" @click="$router.push('/projects')">
-        <v-icon size="18">mdi-arrow-left</v-icon>
-        <span>Projects</span>
-      </button>
       <div class="project-header__info">
         <div class="project-title-row">
           <h1 class="project-title">{{ projectStore.currentProject.name }}</h1>
@@ -142,9 +144,11 @@ import ImageGrid from '@/components/gallery/ImageGrid.vue'
 import PreviewModal from '@/components/gallery/PreviewModal.vue'
 import ShareDialog from '@/components/gallery/ShareDialog.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
+import Breadcrumb from '@/components/navigation/Breadcrumb.vue'
 
 import { useUploadManager } from '@/composables/useUploadManager'
 import { useProjectStore } from '@/stores/projects'
+import { useFolderStore } from '@/stores/folders'
 import { photoService } from '@/api/services/photo.service'
 import type { ProjectImage, UploadPhase, PreviewImage } from '@/types'
 
@@ -163,6 +167,25 @@ const route = useRoute()
 const router = useRouter()
 const projectId = (route?.params?.id as string) ?? 'demo'
 const projectStore = useProjectStore()
+const folderStore = useFolderStore()
+
+const breadcrumbItems = computed(() => {
+  const items: { label: string; to?: string; icon?: string }[] = [
+    { label: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard-outline' },
+  ]
+  const proj = projectStore.currentProject
+  if (proj?.folderId) {
+    const folder = folderStore.folders.find(f => f.id === proj.folderId)
+    if (folder) {
+      items.push({ label: 'Folders', to: '/folders', icon: 'mdi-folder-outline' })
+      items.push({ label: folder.name, to: `/folders/${folder.id}` })
+    }
+  } else {
+    items.push({ label: 'Projects', to: '/projects' })
+  }
+  items.push({ label: proj?.name ?? 'Loading...' })
+  return items
+})
 
 const downloading = ref<boolean>(false)
 const deleteProjectDialog = ref<boolean>(false)

@@ -484,6 +484,8 @@ async function handleCreate(): Promise<void> {
 
   creating.value = true;
   try {
+    debugger
+
     const payload: Record<string, string | undefined> = {
       name: createForm.name.trim(),
       eventType: createForm.eventType,
@@ -491,8 +493,10 @@ async function handleCreate(): Promise<void> {
       clientName: createForm.clientName.trim(),
       clientMobile: createForm.clientMobile.trim(),
       clientEmail: createForm.clientEmail?.trim() || undefined,
+      // coverImage: createForm.clientImage
     };
 
+      return
     const project = await projectStore.createProject(
       payload as { name: string; eventType: string; [key: string]: string | undefined }
     );

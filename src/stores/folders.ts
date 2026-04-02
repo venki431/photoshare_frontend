@@ -135,11 +135,38 @@ export const useFolderStore = defineStore('folders', () => {
     if (folder) folder.projectCount = Math.max(0, folder.projectCount - 1)
   }
 
+  async function shareFolder(id: string): Promise<Folder> {
+    error.value = null
+    try {
+      const res = await folderService.shareFolder(id)
+      const idx = folders.value.findIndex(f => f.id === id)
+      if (idx !== -1) folders.value[idx] = res.data
+      return res.data
+    } catch (err: unknown) {
+      error.value = (err as { message?: string })?.message ?? 'Failed to share folder'
+      throw err
+    }
+  }
+
+  async function unshareFolder(id: string): Promise<Folder> {
+    error.value = null
+    try {
+      const res = await folderService.unshareFolder(id)
+      const idx = folders.value.findIndex(f => f.id === id)
+      if (idx !== -1) folders.value[idx] = res.data
+      return res.data
+    } catch (err: unknown) {
+      error.value = (err as { message?: string })?.message ?? 'Failed to unshare folder'
+      throw err
+    }
+  }
+
   return {
     folders, loading, error, selectedFolderId, selectedFolder, totalFolders,
     folderProjects, folderProjectsLoading, folderProjectsPagination, hasMoreFolderProjects,
     fetchFolders, createFolder, updateFolder, deleteFolder, selectFolder,
     fetchFolderProjects, fetchMoreFolderProjects,
     incrementFolderProjectCount, decrementFolderProjectCount,
+    shareFolder, unshareFolder,
   }
 })

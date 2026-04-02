@@ -64,10 +64,10 @@ withDefaults(defineProps<{
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: clamp(48px, 8vw, 80px) 24px;
-  border-radius: var(--ps-radius-2xl);
+  padding: clamp(40px, 7vw, 64px) 24px;
+  border-radius: var(--ps-radius-lg);
   background: white;
-  border: 2px dashed rgba(79, 70, 229, 0.12);
+  border: 1px dashed rgba(79, 70, 229, 0.15);
   overflow: hidden;
 }
 
@@ -126,8 +126,8 @@ withDefaults(defineProps<{
 }
 
 .icon-circle {
-  width: 80px;
-  height: 80px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   display: flex;
   align-items: center;
