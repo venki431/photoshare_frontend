@@ -10,17 +10,6 @@
           Here's what's happening with your studio today.
         </p>
       </div>
-      <v-btn
-        color="primary"
-        prepend-icon="mdi-folder-plus-outline"
-        size="large"
-        class="text-none ps-btn-glow create-folder-btn"
-        to="/folders"
-        elevation="0"
-        rounded="lg"
-      >
-        Create Folder
-      </v-btn>
     </div>
 
     <!-- Stat Strip -->

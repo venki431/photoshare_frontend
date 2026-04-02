@@ -62,9 +62,11 @@
     </div>
 
     <!-- Share snackbar -->
-    <v-snackbar v-model="shareSnackbar" :timeout="3000" color="success" location="bottom">
-      <v-icon start size="18">mdi-check-circle</v-icon>
-      {{ shareSnackbarText }}
+    <v-snackbar v-model="shareSnackbar" :timeout="3000" :color="shareSnackbarColor" location="top" class="text-center">
+      <div class="d-flex align-center ga-2 justify-center">
+        <v-icon size="18">{{ shareSnackbarColor === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle' }}</v-icon>
+        {{ shareSnackbarText }}
+      </div>
     </v-snackbar>
 
     <!-- Create Project Dialog -->
@@ -362,6 +364,7 @@ function resetAndClose(): void {
 const sharing = ref(false)
 const shareSnackbar = ref(false)
 const shareSnackbarText = ref('')
+const shareSnackbarColor = ref<'success' | 'error'>('success')
 
 async function handleShare(): Promise<void> {
   sharing.value = true
@@ -370,10 +373,12 @@ async function handleShare(): Promise<void> {
     if (updated.shareId) {
       const link = `${window.location.origin}/gallery/folder/${updated.shareId}`
       await navigator.clipboard.writeText(link)
+      shareSnackbarColor.value = 'success'
       shareSnackbarText.value = 'Share link copied to clipboard!'
       shareSnackbar.value = true
     }
   } catch {
+    shareSnackbarColor.value = 'error'
     shareSnackbarText.value = 'Failed to share folder'
     shareSnackbar.value = true
   } finally {

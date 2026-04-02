@@ -32,63 +32,7 @@
           </div>
         </div>
 
-        <!-- Password Protection -->
-        <div class="share-section">
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <v-icon size="18" class="toggle-icon">mdi-lock-outline</v-icon>
-              <div>
-                <div class="toggle-title">Password Protection</div>
-                <div class="toggle-desc">Require a password to view</div>
-              </div>
-            </div>
-            <v-switch
-              v-model="passwordEnabled"
-              color="primary"
-              hide-details
-              density="compact"
-              inset
-            />
-          </div>
-
-          <v-expand-transition>
-            <div v-if="passwordEnabled" class="toggle-content">
-              <v-text-field
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                label="Password"
-                variant="outlined"
-                density="compact"
-                hide-details
-                rounded="lg"
-                :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                @click:append-inner="showPassword = !showPassword"
-              />
-            </div>
-          </v-expand-transition>
-        </div>
-
-        <!-- Expiry -->
-        <div class="share-section">
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <v-icon size="18" class="toggle-icon">mdi-clock-outline</v-icon>
-              <div>
-                <div class="toggle-title">Link Expiry</div>
-                <div class="toggle-desc">Auto-expire this link</div>
-              </div>
-            </div>
-            <v-select
-              v-model="expiry"
-              :items="expiryOptions"
-              variant="outlined"
-              density="compact"
-              hide-details
-              rounded="lg"
-              style="max-width: 140px"
-            />
-          </div>
-        </div>
+        <!-- Password Protection & Link Expiry hidden for now -->
       </div>
 
       <!-- Footer -->

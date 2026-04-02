@@ -130,7 +130,8 @@ export const useProjectStore = defineStore('projects', () => {
       const selectedIds = new Set(selection.selectedIds ?? [])
       const comments = selection.comments ?? {}
 
-      const photosRes = await photoService.getPhotosByProject(projectData.id, { perPage: 10 })
+      const photosRes = await photoService.getPhotosByProject(projectData.id, { page: 1, perPage: 10 })
+      if (photosRes.meta) photoPagination.value = photosRes.meta
 
       const project: ProjectWithImages = {
         ...(projectData as unknown as Project),
@@ -246,13 +247,16 @@ export const useProjectStore = defineStore('projects', () => {
     }
   }
 
-  async function deleteProject(id: string): Promise<void> {
+  async function deleteProject(id: string): Promise<{ folderId?: string }> {
     _begin()
     try {
+      const project = projects.value.find(p => p.id === id) ?? currentProject.value
+      const folderId = project?.folderId
       await projectService.deleteProject(id)
       projects.value = projects.value.filter(p => p.id !== id)
       if (currentProject.value?.id === id) currentProject.value = null
       pagination.value.total = Math.max(0, pagination.value.total - 1)
+      return { folderId }
     } catch (err: unknown) {
       error.value = (err as { message?: string })?.message ?? 'Failed to delete project'
       throw err

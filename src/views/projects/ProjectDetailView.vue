@@ -125,7 +125,7 @@
     />
 
     <!-- Snackbar -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="2500" location="bottom end" rounded="lg">
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="2500" location="top" rounded="lg">
       <div class="d-flex align-center ga-2">
         <v-icon size="18">{{ snackbar.color === 'success' ? 'mdi-check-circle' : snackbar.color === 'error' ? 'mdi-alert-circle' : 'mdi-information' }}</v-icon>
         {{ snackbar.text }}
@@ -208,7 +208,8 @@ onMounted(async () => {
 async function handleDeleteProject(): Promise<void> {
   deletingProject.value = true
   try {
-    await projectStore.deleteProject(projectId)
+    const { folderId } = await projectStore.deleteProject(projectId)
+    if (folderId) folderStore.decrementFolderProjectCount(folderId)
     deleteProjectDialog.value = false
     router.push('/projects')
   } catch {
@@ -272,9 +273,10 @@ const currentPhase = computed<UploadPhase>(() => toValue(uploadManager.phase) as
 
 const galleryImages = computed<NormalizedImage[]>(() => {
   const previews = (toValue(uploadManager.previewImages) ?? []) as PreviewImage[]
-  return [
-    ...uploadedImages.value,
-    ...previews.map((p) => ({
+  const uploadedKeys = new Set(uploadedImages.value.map(img => img.fileKey))
+  const remainingPreviews = previews
+    .filter(p => !uploadedKeys.has(p.fileKey))
+    .map((p) => ({
       id: String(p.id),
       url: p.url,
       thumbUrl: p.thumbUrl,
@@ -283,7 +285,10 @@ const galleryImages = computed<NormalizedImage[]>(() => {
       serverId: '',
       selectedByClient: false,
       isPreview: true,
-    } satisfies NormalizedImage)),
+    } satisfies NormalizedImage))
+  return [
+    ...uploadedImages.value,
+    ...remainingPreviews,
   ]
 })
 
