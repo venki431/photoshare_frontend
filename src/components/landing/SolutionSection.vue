@@ -33,7 +33,7 @@
       </div>
 
       <!-- Animated visual -->
-      <div v-scroll-reveal class="solution__visual">
+      <div v-scroll-reveal class="solution__visual" v-if="false">
         <div class="solution__screen">
           <div class="solution__screen-bar">
             <div class="solution__screen-dots">
@@ -109,11 +109,11 @@ const steps: Step[] = [
 
 <style scoped lang="scss">
 .solution {
-  padding: 100px 24px;
+  padding: 60px 24px;
   background: white;
 
   @media (max-width: 600px) {
-    padding: 60px 16px;
+    padding: 40px 16px;
   }
 }
 
@@ -132,7 +132,7 @@ const steps: Step[] = [
   justify-content: center;
   gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 72px;
+  margin-bottom: 40px;
 
   @media (max-width: 768px) {
     flex-direction: column;

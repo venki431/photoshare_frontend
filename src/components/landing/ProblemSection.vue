@@ -81,11 +81,11 @@ const problems: Problem[] = [
 
 <style scoped lang="scss">
 .problems {
-  padding: 100px 24px;
+  padding: 60px 24px;
   background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
 
   @media (max-width: 600px) {
-    padding: 60px 16px;
+    padding: 40px 16px;
   }
 }
 

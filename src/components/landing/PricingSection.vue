@@ -42,7 +42,7 @@
         <ul class="pricing__disclaimer-list">
           <li>All prices are in Indian Rupees (INR) and inclusive of applicable taxes unless stated otherwise. Prices are subject to change with 30 days' prior notice.</li>
           <li>PhotoShare is an image <strong>sharing and selection platform only</strong> — it is not a storage, backup, or archival service. No original files are stored; only compressed versions are retained temporarily.</li>
-          <li>Selected images are automatically and permanently deleted from our servers <strong>2 months after client selection</strong>. No recovery is possible after deletion.</li>
+          <li>All uploaded and selected images are automatically and permanently deleted from our servers <strong>2 months from the date of upload</strong>, regardless of when the client selects them. No recovery is possible after deletion.</li>
           <li>"Unlimited" features are subject to fair usage policies to ensure service quality for all users.</li>
           <li>Subscription fees are non-refundable. Pro-rata refunds may be issued at PhotoShare's sole discretion for termination without cause.</li>
           <li>PhotoShare does not guarantee any specific business outcomes, client acquisition, or revenue as a result of using the Service.</li>
@@ -119,11 +119,11 @@ const plans: Plan[] = [
 
 <style scoped lang="scss">
 .pricing {
-  padding: 100px 24px;
+  padding: 60px 24px;
   background: #f8fafc;
 
   @media (max-width: 600px) {
-    padding: 60px 16px;
+    padding: 40px 16px;
   }
 }
 

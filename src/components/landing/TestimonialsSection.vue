@@ -89,11 +89,11 @@ const testimonials: Testimonial[] = [
 
 <style scoped lang="scss">
 .testimonials {
-  padding: 100px 24px;
+  padding: 60px 24px;
   background: white;
 
   @media (max-width: 600px) {
-    padding: 60px 16px;
+    padding: 40px 16px;
   }
 }
 

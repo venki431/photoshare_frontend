@@ -90,11 +90,11 @@ const clientSteps: HowStep[] = [
 
 <style scoped lang="scss">
 .how {
-  padding: 100px 24px;
+  padding: 60px 24px;
   background: linear-gradient(180deg, #faf5ff 0%, #f8fafc 50%, #fff 100%);
 
   @media (max-width: 600px) {
-    padding: 60px 16px;
+    padding: 40px 16px;
   }
 }
 

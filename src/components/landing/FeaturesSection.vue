@@ -106,11 +106,11 @@ const features: Feature[] = [
 
 <style scoped lang="scss">
 .features {
-  padding: 100px 24px;
+  padding: 60px 24px;
   background: #f8fafc;
 
   @media (max-width: 600px) {
-    padding: 60px 16px;
+    padding: 40px 16px;
   }
 }
 

@@ -27,13 +27,13 @@
 <style scoped lang="scss">
 .cta {
   position: relative;
-  padding: 100px 24px;
+  padding: 60px 24px;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
   overflow: hidden;
   text-align: center;
 
   @media (max-width: 600px) {
-    padding: 60px 16px;
+    padding: 40px 16px;
   }
 }
 

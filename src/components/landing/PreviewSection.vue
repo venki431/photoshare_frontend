@@ -122,11 +122,11 @@ function toggleSelect(id: number): void {
 
 <style scoped lang="scss">
 .preview {
-  padding: 100px 24px;
+  padding: 60px 24px;
   background: white;
 
   @media (max-width: 600px) {
-    padding: 60px 16px;
+    padding: 40px 16px;
   }
 }
 

@@ -113,12 +113,12 @@ function scrollToPreview(): void {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 120px 24px 80px;
+  padding: 100px 24px 40px;
   gap: 60px;
 
   @media (max-width: 960px) {
     flex-direction: column;
-    padding: 100px 20px 60px;
+    padding: 80px 20px 40px;
     min-height: auto;
     gap: 40px;
   }
